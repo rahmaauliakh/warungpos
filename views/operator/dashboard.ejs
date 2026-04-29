@@ -4,9 +4,9 @@
       sidebarTitle: "Operator Panel",
       sidebarDescription: "Manajemen produk, stock, dan kategori dalam satu dashboard.",
       sidebarLinks: [
-        { href: "/operator", label: "Product Management", short: "PM", matchPrefix: "/operator" },
-        { label: "Katalog", short: "KT" },
-        { label: "Inventory", short: "IV" }
+        { href: "/operator#produk", label: "Product Management", short: "PM", matchPrefix: "/operator" },
+        { href: "/operator#katalog", label: "Katalog", short: "KT" },
+        { href: "/operator#inventory", label: "Inventory", short: "IV" }
       ],
       currentPath,
       sessionUser
@@ -37,7 +37,7 @@
       </header>
 
       <section class="px-6 py-6">
-        <div class="grid gap-5 xl:grid-cols-4">
+        <div id="inventory" class="scroll-mt-6 grid gap-5 xl:grid-cols-4">
           <% stats.forEach((stat) => { %>
             <article class="overflow-hidden rounded-3xl bg-white shadow-panel ring-1 ring-slate-200">
               <div class="bg-gradient-to-r <%= stat.accent %> p-5 text-white">
@@ -52,7 +52,7 @@
         </div>
 
         <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.7fr)]">
-          <section class="rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
+          <section id="produk" class="scroll-mt-6 rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <h3 class="text-xl font-semibold text-slate-950">Daftar Produk</h3>
@@ -136,7 +136,7 @@
           </section>
 
           <section class="space-y-6">
-            <article class="rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
+            <article id="katalog" class="scroll-mt-6 rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
               <h3 class="text-xl font-semibold text-slate-950">Kategori Produk</h3>
               <p class="mt-1 text-sm text-slate-500">Kategori aktif yang terdeteksi dari data produk saat ini.</p>
 

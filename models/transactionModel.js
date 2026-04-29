@@ -61,16 +61,19 @@ exports.createTransactionWithItems = async ({ transaction, items }) => {
 
     const transactionResult = await query(
       `
-        INSERT INTO transactions (invoice, user_id, subtotal, fee, grand_total, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO transactions (invoice, user_id, cashier_id, subtotal, fee, grand_total, status, payment_method, stock_deducted, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `,
       [
         transaction.invoice,
-        transaction.user_id,
+        transaction.user_id || null,
+        transaction.cashier_id || null,
         transaction.subtotal,
         transaction.fee,
         transaction.grand_total,
-        transaction.status
+        transaction.status,
+        transaction.payment_method || null,
+        transaction.stock_deducted || 0
       ]
     );
 
@@ -95,6 +98,92 @@ exports.createTransactionWithItems = async ({ transaction, items }) => {
 
     return {
       id: transactionId,
+      invoice: transaction.invoice
+    };
+  } catch (error) {
+    await rollback();
+    throw error;
+  }
+};
+
+exports.createDirectPaidTransaction = async ({ transaction, items }) => {
+  try {
+    await beginTransaction();
+
+    for (const item of items) {
+      const product = await getSingle(
+        `
+          SELECT id, nama_produk, stock
+          FROM products
+          WHERE id = ?
+          LIMIT 1
+        `,
+        [item.product_id]
+      );
+
+      if (!product) {
+        await rollback();
+        return { success: false, reason: "product_not_found" };
+      }
+
+      if (Number(product.stock) < Number(item.qty)) {
+        await rollback();
+        return {
+          success: false,
+          reason: "insufficient_stock",
+          productName: product.nama_produk
+        };
+      }
+    }
+
+    const transactionResult = await query(
+      `
+        INSERT INTO transactions (invoice, user_id, cashier_id, subtotal, fee, grand_total, status, payment_method, stock_deducted, created_at)
+        VALUES (?, NULL, ?, ?, ?, ?, 'paid', ?, 1, NOW())
+      `,
+      [
+        transaction.invoice,
+        transaction.cashier_id,
+        transaction.subtotal,
+        transaction.fee,
+        transaction.grand_total,
+        transaction.payment_method
+      ]
+    );
+
+    const transactionId = transactionResult.insertId;
+    const itemValues = items.map((item) => [
+      transactionId,
+      item.product_id,
+      item.qty,
+      item.price,
+      item.subtotal
+    ]);
+
+    await query(
+      `
+        INSERT INTO transaction_items (transaction_id, product_id, qty, price, subtotal)
+        VALUES ?
+      `,
+      [itemValues]
+    );
+
+    for (const item of items) {
+      await query(
+        `
+          UPDATE products
+          SET stock = stock - ?
+          WHERE id = ?
+        `,
+        [item.qty, item.product_id]
+      );
+    }
+
+    await commit();
+
+    return {
+      success: true,
+      transactionId,
       invoice: transaction.invoice
     };
   } catch (error) {
@@ -140,6 +229,45 @@ exports.getByInvoiceAndUser = async (invoice, userId) => {
   );
 
   return results[0] || null;
+};
+
+exports.getByUser = async (userId) => {
+  return query(
+    `
+      SELECT
+        t.id,
+        t.invoice,
+        t.user_id,
+        t.cashier_id,
+        t.subtotal,
+        t.fee,
+        t.grand_total,
+        t.status,
+        t.payment_method,
+        t.created_at,
+        c.nama AS cashier_name,
+        COUNT(ti.id) AS total_items,
+        COALESCE(SUM(ti.qty), 0) AS total_qty
+      FROM transactions t
+      LEFT JOIN users c ON c.id = t.cashier_id
+      LEFT JOIN transaction_items ti ON ti.transaction_id = t.id
+      WHERE t.user_id = ?
+      GROUP BY
+        t.id,
+        t.invoice,
+        t.user_id,
+        t.cashier_id,
+        t.subtotal,
+        t.fee,
+        t.grand_total,
+        t.status,
+        t.payment_method,
+        t.created_at,
+        c.nama
+      ORDER BY t.created_at DESC, t.id DESC
+    `,
+    [userId]
+  );
 };
 
 exports.getById = async (transactionId) => {
@@ -192,26 +320,91 @@ exports.getItemsByTransactionId = async (transactionId) => {
 };
 
 exports.updateStatus = async ({ transactionId, status, cashierId, allowedCurrentStatuses }) => {
-  const transaction = await this.getById(transactionId);
+  try {
+    await beginTransaction();
 
-  if (!transaction) {
-    return { success: false, reason: "not_found" };
+    const transaction = await getSingle(
+      `
+        SELECT id, invoice, status, stock_deducted
+        FROM transactions
+        WHERE id = ?
+        LIMIT 1
+      `,
+      [transactionId]
+    );
+
+    if (!transaction) {
+      await rollback();
+      return { success: false, reason: "not_found" };
+    }
+
+    if (!allowedCurrentStatuses.includes(transaction.status)) {
+      await rollback();
+      return { success: false, reason: "invalid_status", transaction };
+    }
+
+    if (status === "approved" && Number(transaction.stock_deducted || 0) === 0) {
+      const items = await query(
+        `
+          SELECT product_id, qty
+          FROM transaction_items
+          WHERE transaction_id = ?
+        `,
+        [transactionId]
+      );
+
+      for (const item of items) {
+        const product = await getSingle(
+          `
+            SELECT id, nama_produk, stock
+            FROM products
+            WHERE id = ?
+            LIMIT 1
+          `,
+          [item.product_id]
+        );
+
+        if (!product) {
+          await rollback();
+          return { success: false, reason: "product_not_found" };
+        }
+
+        if (Number(product.stock) < Number(item.qty)) {
+          await rollback();
+          return {
+            success: false,
+            reason: "insufficient_stock",
+            productName: product.nama_produk
+          };
+        }
+
+        await query(
+          `
+            UPDATE products
+            SET stock = stock - ?
+            WHERE id = ?
+          `,
+          [item.qty, item.product_id]
+        );
+      }
+    }
+
+    await query(
+      `
+        UPDATE transactions
+        SET status = ?, cashier_id = ?, stock_deducted = ?
+        WHERE id = ?
+      `,
+      [status, cashierId, status === "approved" ? 1 : Number(transaction.stock_deducted || 0), transactionId]
+    );
+
+    await commit();
+
+    return { success: true };
+  } catch (error) {
+    await rollback();
+    throw error;
   }
-
-  if (!allowedCurrentStatuses.includes(transaction.status)) {
-    return { success: false, reason: "invalid_status", transaction };
-  }
-
-  await query(
-    `
-      UPDATE transactions
-      SET status = ?, cashier_id = ?
-      WHERE id = ?
-    `,
-    [status, cashierId, transactionId]
-  );
-
-  return { success: true };
 };
 
 exports.payTransaction = async ({ transactionId, cashierId, paymentMethod }) => {
@@ -220,7 +413,7 @@ exports.payTransaction = async ({ transactionId, cashierId, paymentMethod }) => 
 
     const transaction = await getSingle(
       `
-        SELECT id, invoice, status
+        SELECT id, invoice, status, stock_deducted
         FROM transactions
         WHERE id = ?
         LIMIT 1
@@ -238,54 +431,56 @@ exports.payTransaction = async ({ transactionId, cashierId, paymentMethod }) => 
       return { success: false, reason: "invalid_status", transaction };
     }
 
-    const items = await query(
-      `
-        SELECT product_id, qty
-        FROM transaction_items
-        WHERE transaction_id = ?
-      `,
-      [transactionId]
-    );
-
-    for (const item of items) {
-      const product = await getSingle(
+    if (Number(transaction.stock_deducted || 0) === 0) {
+      const items = await query(
         `
-          SELECT id, nama_produk, stock
-          FROM products
-          WHERE id = ?
-          LIMIT 1
+          SELECT product_id, qty
+          FROM transaction_items
+          WHERE transaction_id = ?
         `,
-        [item.product_id]
+        [transactionId]
       );
 
-      if (!product) {
-        await rollback();
-        return { success: false, reason: "product_not_found" };
-      }
+      for (const item of items) {
+        const product = await getSingle(
+          `
+            SELECT id, nama_produk, stock
+            FROM products
+            WHERE id = ?
+            LIMIT 1
+          `,
+          [item.product_id]
+        );
 
-      if (Number(product.stock) < Number(item.qty)) {
-        await rollback();
-        return {
-          success: false,
-          reason: "insufficient_stock",
-          productName: product.nama_produk
-        };
-      }
+        if (!product) {
+          await rollback();
+          return { success: false, reason: "product_not_found" };
+        }
 
-      await query(
-        `
-          UPDATE products
-          SET stock = stock - ?
-          WHERE id = ?
-        `,
-        [item.qty, item.product_id]
-      );
+        if (Number(product.stock) < Number(item.qty)) {
+          await rollback();
+          return {
+            success: false,
+            reason: "insufficient_stock",
+            productName: product.nama_produk
+          };
+        }
+
+        await query(
+          `
+            UPDATE products
+            SET stock = stock - ?
+            WHERE id = ?
+          `,
+          [item.qty, item.product_id]
+        );
+      }
     }
 
     await query(
       `
         UPDATE transactions
-        SET status = ?, cashier_id = ?, payment_method = ?
+        SET status = ?, cashier_id = ?, payment_method = ?, stock_deducted = 1
         WHERE id = ?
       `,
       ["paid", cashierId, paymentMethod, transactionId]

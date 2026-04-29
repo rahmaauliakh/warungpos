@@ -11,6 +11,9 @@
           <div class="hidden rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600 sm:block">
             <span class="font-medium text-slate-900"><%= sessionUser?.nama || sessionUser?.email %></span>
           </div>
+          <a href="/konsumen/history" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            Riwayat
+          </a>
           <form action="/logout" method="POST">
             <button type="submit" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
               Logout
@@ -128,7 +131,7 @@
                       </p>
                     </div>
                     <form action="/konsumen/cart/<%= product.id %>/add" method="POST">
-                      <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '' }).toString() %>">
+                      <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '', page: filters.page || 1 }).toString() %>">
                       <button
                         type="submit"
                         class="rounded-2xl px-4 py-3 text-sm font-semibold transition <%= Number(product.stock) > 0 ? 'bg-slate-950 text-white hover:bg-slate-800' : 'bg-slate-200 text-slate-400 cursor-not-allowed' %>"
@@ -142,6 +145,27 @@
               </article>
             <% }) %>
           </section>
+
+          <nav class="flex flex-col gap-3 rounded-[24px] bg-white px-5 py-4 shadow-soft ring-1 ring-slate-200 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-slate-500">
+              Halaman <span class="font-semibold text-slate-900"><%= pagination.currentPage %></span> dari <span class="font-semibold text-slate-900"><%= pagination.totalPages %></span>
+              <span class="text-slate-400">(<%= pagination.totalItems %> produk)</span>
+            </p>
+            <div class="flex gap-2">
+              <a
+                href="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '', page: pagination.prevPage }).toString() %>"
+                class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold transition <%= pagination.hasPrev ? 'bg-white text-slate-700 hover:bg-slate-50' : 'pointer-events-none bg-slate-100 text-slate-400' %>"
+              >
+                Sebelumnya
+              </a>
+              <a
+                href="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '', page: pagination.nextPage }).toString() %>"
+                class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold transition <%= pagination.hasNext ? 'bg-slate-950 text-white hover:bg-slate-800' : 'pointer-events-none bg-slate-100 text-slate-400' %>"
+              >
+                Berikutnya
+              </a>
+            </div>
+          </nav>
         </div>
 
         <aside class="xl:sticky xl:top-24 xl:h-fit">
@@ -189,7 +213,7 @@
                             <p class="mt-1 text-xs text-slate-500"><%= item.hargaFormatted %></p>
                           </div>
                           <form action="/konsumen/cart/<%= item.productId %>/remove" method="POST">
-                            <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '' }).toString() %>">
+                            <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '', page: filters.page || 1 }).toString() %>">
                             <button type="submit" class="rounded-xl bg-white px-2.5 py-2 text-xs font-semibold text-rose-600 ring-1 ring-slate-200 transition hover:bg-rose-50">
                               Hapus
                             </button>
@@ -200,13 +224,13 @@
                           <div class="inline-flex items-center rounded-2xl bg-white ring-1 ring-slate-200">
                             <form action="/konsumen/cart/<%= item.productId %>/qty" method="POST">
                               <input type="hidden" name="action" value="decrease">
-                              <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '' }).toString() %>">
+                              <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '', page: filters.page || 1 }).toString() %>">
                               <button type="submit" class="px-3 py-2 text-sm font-semibold text-slate-700">-</button>
                             </form>
                             <span class="min-w-10 px-2 text-center text-sm font-semibold text-slate-900"><%= item.qty %></span>
                             <form action="/konsumen/cart/<%= item.productId %>/qty" method="POST">
                               <input type="hidden" name="action" value="increase">
-                              <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '' }).toString() %>">
+                              <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '', page: filters.page || 1 }).toString() %>">
                               <button type="submit" class="px-3 py-2 text-sm font-semibold text-slate-700">+</button>
                             </form>
                           </div>
@@ -228,7 +252,7 @@
                   <span class="text-2xl font-semibold tracking-tight text-slate-950"><%= cart.subtotalFormatted %></span>
                 </div>
                 <form action="/konsumen/checkout" method="POST" class="mt-4">
-                  <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '' }).toString() %>">
+                  <input type="hidden" name="redirect" value="/konsumen?<%= new URLSearchParams({ search: filters.search || '', kategori: filters.kategori || '', page: filters.page || 1 }).toString() %>">
                   <button type="submit" class="w-full rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
                     Checkout
                   </button>

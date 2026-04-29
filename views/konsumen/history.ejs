@@ -1,0 +1,111 @@
+<%- include("../partials/header", { pageTitle, bodyClass: "bg-slate-100 text-slate-900" }) %>
+  <div class="min-h-screen">
+    <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div>
+          <p class="text-xs uppercase tracking-[0.35em] text-slate-400">WarungPOS</p>
+          <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">Riwayat Transaksi</h1>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="/konsumen" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            Katalog
+          </a>
+          <form action="/logout" method="POST">
+            <button type="submit" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <% if (typeof historyError !== 'undefined' && historyError) { %>
+        <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <%= historyError %>
+        </div>
+      <% } %>
+
+      <section class="overflow-hidden rounded-[28px] bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-8 text-white shadow-soft sm:px-8">
+        <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-300">Status pesanan</p>
+            <h2 class="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Cek pesanan dan bukti pembayaran.</h2>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+              Struk pembayaran hanya tersedia untuk transaksi yang sudah selesai dibayar.
+            </p>
+          </div>
+          <div class="rounded-3xl bg-white/10 p-4">
+            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Total Transaksi</p>
+            <p class="mt-2 text-2xl font-semibold"><%= transactions.length %></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-6 overflow-hidden rounded-[28px] bg-white shadow-soft ring-1 ring-slate-200">
+        <% if (transactions.length === 0) { %>
+          <div class="px-6 py-16 text-center">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100">
+              <svg class="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14h6m-6-4h6m-8 10h10a2 2 0 002-2V7.8a2 2 0 00-.6-1.4l-3.8-3.8A2 2 0 0013.2 2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="mt-4 text-xl font-semibold text-slate-950">Belum ada transaksi</h3>
+            <p class="mt-2 text-sm text-slate-500">Checkout dari katalog untuk membuat pesanan pertama.</p>
+            <a href="/konsumen" class="mt-5 inline-flex rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+              Mulai Belanja
+            </a>
+          </div>
+        <% } else { %>
+          <div class="divide-y divide-slate-100">
+            <% transactions.forEach((transaction) => { %>
+              <article class="grid gap-5 px-5 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_180px] lg:items-center">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 <%= transaction.status_meta.tone %>">
+                      <%= transaction.status_meta.label %>
+                    </span>
+                    <span class="text-sm text-slate-500"><%= transaction.created_at_formatted %></span>
+                  </div>
+
+                  <div class="mt-3 grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Invoice</p>
+                      <p class="mt-2 break-all text-base font-semibold text-slate-950"><%= transaction.invoice %></p>
+                    </div>
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Total</p>
+                      <p class="mt-2 text-base font-semibold text-slate-950"><%= transaction.grand_total_formatted %></p>
+                    </div>
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Item</p>
+                      <p class="mt-2 text-base font-semibold text-slate-950"><%= transaction.total_qty %> qty</p>
+                    </div>
+                  </div>
+
+                  <p class="mt-3 text-sm leading-6 text-slate-500"><%= transaction.status_meta.description %></p>
+                  <% if (transaction.cashier_name) { %>
+                    <p class="mt-1 text-sm text-slate-500">Kasir: <span class="font-medium text-slate-700"><%= transaction.cashier_name %></span></p>
+                  <% } %>
+                </div>
+
+                <div class="flex flex-wrap gap-3 lg:justify-end">
+                  <% if (transaction.status !== "paid") { %>
+                    <a href="/konsumen/waiting/<%= transaction.invoice %>" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                      Cek Status
+                    </a>
+                  <% } else { %>
+                    <a href="/konsumen/receipt/<%= transaction.invoice %>" class="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                      Lihat Struk
+                    </a>
+                  <% } %>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+        <% } %>
+      </section>
+    </main>
+  </div>
+<%- include("../partials/footer", { flash }) %>

@@ -18,8 +18,8 @@
               Pesanan Anda sudah masuk ke sistem dan sedang menunggu konfirmasi dari kasir.
             </p>
           </div>
-          <span class="inline-flex w-fit rounded-full bg-amber-400/15 px-4 py-2 text-sm font-semibold text-amber-300 ring-1 ring-inset ring-amber-300/20">
-            <%= transaction.status %>
+          <span class="inline-flex w-fit rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/20">
+            <%= transaction.status_meta.label %>
           </span>
         </div>
       </div>
@@ -60,9 +60,13 @@
               <div class="mt-3 rounded-2xl bg-rose-50 px-4 py-4 text-sm text-rose-700 ring-1 ring-rose-200">
                 Transaksi ditolak. Silakan kembali ke katalog dan lakukan checkout ulang jika diperlukan.
               </div>
+            <% } else if (transaction.status === "approved") { %>
+              <div class="mt-3 rounded-2xl bg-sky-50 px-4 py-4 text-sm text-sky-700 ring-1 ring-sky-200">
+                Pesanan sudah disetujui kasir. Struk pembayaran akan tersedia setelah pembayaran selesai diproses.
+              </div>
             <% } else { %>
               <div class="mt-3 rounded-2xl bg-sky-50 px-4 py-4 text-sm text-sky-700 ring-1 ring-sky-200">
-                Sistem akan memeriksa status transaksi setiap 5 detik dan otomatis melanjutkan saat pesanan sudah disetujui.
+                Sistem akan memeriksa status transaksi setiap 5 detik sampai pesanan dikonfirmasi kasir.
               </div>
             <% } %>
           </div>
@@ -70,6 +74,9 @@
           <div class="flex flex-wrap gap-3">
             <a href="/konsumen" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
               Kembali ke Katalog
+            </a>
+            <a href="/konsumen/history" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+              Lihat Riwayat
             </a>
             <button type="button" onclick="window.location.reload()" class="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
               Refresh Status
@@ -80,7 +87,7 @@
     </section>
   </div>
 
-  <% if (transaction.status === "pending") { %>
+  <% if (["pending", "approved"].includes(transaction.status)) { %>
     <script>
       window.setTimeout(() => {
         window.location.reload();

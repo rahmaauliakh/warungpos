@@ -20,6 +20,31 @@ exports.getAll = async () => {
   return query(sql);
 };
 
+exports.getPaginated = async ({ page = 1, limit = 6 } = {}) => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.max(Number(limit) || 6, 1);
+  const offset = (safePage - 1) * safeLimit;
+  const [rows, countRows] = await Promise.all([
+    query(
+      `
+        SELECT id, nama_produk, harga, stock, kategori, gambar
+        FROM products
+        ORDER BY id DESC
+        LIMIT ? OFFSET ?
+      `,
+      [safeLimit, offset]
+    ),
+    query("SELECT COUNT(*) AS total FROM products")
+  ]);
+
+  return {
+    rows,
+    total: Number(countRows[0]?.total || 0),
+    page: safePage,
+    limit: safeLimit
+  };
+};
+
 exports.getCatalog = async ({ search = "", kategori = "" } = {}) => {
   let sql = `
     SELECT id, nama_produk, harga, stock, kategori, gambar
@@ -41,6 +66,52 @@ exports.getCatalog = async ({ search = "", kategori = "" } = {}) => {
   sql += " ORDER BY id DESC";
 
   return query(sql, values);
+};
+
+exports.getCatalogPaginated = async ({ search = "", kategori = "", page = 1, limit = 6 } = {}) => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.max(Number(limit) || 6, 1);
+  const offset = (safePage - 1) * safeLimit;
+  let whereSql = "WHERE 1 = 1";
+  const values = [];
+
+  if (search) {
+    whereSql += " AND nama_produk LIKE ?";
+    values.push(`%${search}%`);
+  }
+
+  if (kategori) {
+    whereSql += " AND kategori = ?";
+    values.push(kategori);
+  }
+
+  const [rows, countRows] = await Promise.all([
+    query(
+      `
+        SELECT id, nama_produk, harga, stock, kategori, gambar
+        FROM products
+        ${whereSql}
+        ORDER BY id DESC
+        LIMIT ? OFFSET ?
+      `,
+      [...values, safeLimit, offset]
+    ),
+    query(
+      `
+        SELECT COUNT(*) AS total
+        FROM products
+        ${whereSql}
+      `,
+      values
+    )
+  ]);
+
+  return {
+    rows,
+    total: Number(countRows[0]?.total || 0),
+    page: safePage,
+    limit: safeLimit
+  };
 };
 
 exports.getCategories = async () => {

@@ -1,5 +1,6 @@
 const ProductModel = require("../models/productModel");
 const TransactionModel = require("../models/transactionModel");
+const PDFDocument = require("pdfkit");
 
 const setFlash = (req, payload) => {
   req.session.flash = payload;
@@ -11,6 +12,8 @@ const ROLE_REDIRECTS = {
   kasir: "/kasir",
   konsumen: "/konsumen"
 };
+
+const FEE_RATE = 0.01;
 
 const formatCurrency = (value) => new Intl.NumberFormat("id-ID", {
   style: "currency",
@@ -25,6 +28,52 @@ const formatDateTime = (value) => new Intl.DateTimeFormat("id-ID", {
   hour: "2-digit",
   minute: "2-digit"
 }).format(new Date(value));
+
+const STATUS_META = {
+  pending: {
+    label: "Menunggu Approve",
+    tone: "bg-amber-100 text-amber-700 ring-amber-200",
+    description: "Pesanan sudah masuk dan menunggu konfirmasi kasir."
+  },
+  approved: {
+    label: "Disetujui",
+    tone: "bg-sky-100 text-sky-700 ring-sky-200",
+    description: "Pesanan sudah disetujui kasir dan menunggu pembayaran."
+  },
+  paid: {
+    label: "Selesai Dibayar",
+    tone: "bg-emerald-100 text-emerald-700 ring-emerald-200",
+    description: "Pesanan sudah dibayar dan transaksi selesai."
+  },
+  rejected: {
+    label: "Ditolak",
+    tone: "bg-rose-100 text-rose-700 ring-rose-200",
+    description: "Pesanan ditolak. Silakan buat pesanan baru jika masih diperlukan."
+  }
+};
+
+const getStatusMeta = (status) => STATUS_META[status] || {
+  label: status || "Unknown",
+  tone: "bg-slate-100 text-slate-700 ring-slate-200",
+  description: "Status transaksi belum dikenali sistem."
+};
+
+const calculateFee = (subtotal) => Math.round(Number(subtotal || 0) * FEE_RATE);
+
+const buildPagination = ({ page, limit, total }) => {
+  const totalPages = Math.max(Math.ceil(total / limit), 1);
+  const currentPage = Math.min(Math.max(Number(page) || 1, 1), totalPages);
+
+  return {
+    currentPage,
+    totalPages,
+    totalItems: total,
+    hasPrev: currentPage > 1,
+    hasNext: currentPage < totalPages,
+    prevPage: Math.max(currentPage - 1, 1),
+    nextPage: Math.min(currentPage + 1, totalPages)
+  };
+};
 
 const normalizeCart = (cart = []) => {
   if (!Array.isArray(cart)) {
@@ -59,6 +108,41 @@ const buildCartView = (cartItems) => {
   };
 };
 
+const getReceiptData = async (invoice, userId) => {
+  const transaction = await TransactionModel.getByInvoiceAndUser(invoice, userId);
+
+  if (!transaction) {
+    return null;
+  }
+
+  const items = await TransactionModel.getItemsByTransactionId(transaction.id);
+
+  return {
+    transaction: {
+      ...transaction,
+      status_meta: getStatusMeta(transaction.status),
+      grand_total_formatted: formatCurrency(transaction.grand_total),
+      subtotal_formatted: formatCurrency(transaction.subtotal),
+      fee_formatted: formatCurrency(transaction.fee),
+      created_at_formatted: formatDateTime(transaction.created_at)
+    },
+    items: items.map((item) => ({
+      ...item,
+      price_formatted: formatCurrency(item.price),
+      subtotal_formatted: formatCurrency(item.subtotal)
+    }))
+  };
+};
+
+const redirectUnpaidToStatus = (req, res, transaction) => {
+  setFlash(req, {
+    type: "error",
+    message: "Struk pembayaran hanya tersedia setelah pesanan dibayar."
+  });
+
+  return res.redirect(`/konsumen/waiting/${transaction.invoice}`);
+};
+
 const findCartItemIndex = (cart, productId) => cart.findIndex((item) => item.productId === productId);
 
 const generateInvoice = () => {
@@ -70,23 +154,28 @@ const generateInvoice = () => {
 exports.index = async (req, res) => {
   const search = req.query.search ? req.query.search.trim() : "";
   const kategori = req.query.kategori ? req.query.kategori.trim() : "";
+  const page = Number(req.query.page) || 1;
+  const productLimit = 6;
 
   try {
-    const [products, categoryRows] = await Promise.all([
-      ProductModel.getCatalog({ search, kategori }),
+    const [productPage, categoryRows] = await Promise.all([
+      ProductModel.getCatalogPaginated({ search, kategori, page, limit: productLimit }),
       ProductModel.getCategories()
     ]);
 
     const cart = buildCartView(normalizeCart(req.session.cart));
+    const pagination = buildPagination(productPage);
 
     return res.render("konsumen/index", {
       pageTitle: "Katalog Produk",
-      products,
+      products: productPage.rows,
       categories: categoryRows.map((row) => row.kategori),
       filters: {
         search,
-        kategori
+        kategori,
+        page: pagination.currentPage
       },
+      pagination,
       cart
     });
   } catch (error) {
@@ -98,10 +187,38 @@ exports.index = async (req, res) => {
       categories: [],
       filters: {
         search,
-        kategori
+        kategori,
+        page: 1
       },
+      pagination: buildPagination({ page: 1, limit: productLimit, total: 0 }),
       cart: buildCartView([]),
       catalogError: "Gagal memuat katalog produk."
+    });
+  }
+};
+
+exports.history = async (req, res) => {
+  try {
+    const transactions = await TransactionModel.getByUser(req.session.user.id);
+
+    return res.render("konsumen/history", {
+      pageTitle: "Riwayat Transaksi",
+      transactions: transactions.map((transaction) => ({
+        ...transaction,
+        status_meta: getStatusMeta(transaction.status),
+        grand_total_formatted: formatCurrency(transaction.grand_total),
+        subtotal_formatted: formatCurrency(transaction.subtotal),
+        fee_formatted: formatCurrency(transaction.fee),
+        created_at_formatted: formatDateTime(transaction.created_at)
+      }))
+    });
+  } catch (error) {
+    console.error("Konsumen history error:", error);
+
+    return res.status(500).render("konsumen/history", {
+      pageTitle: "Riwayat Transaksi",
+      transactions: [],
+      historyError: "Gagal memuat riwayat transaksi."
     });
   }
 };
@@ -294,7 +411,7 @@ exports.checkout = async (req, res) => {
     }
 
     const subtotal = validatedItems.reduce((sum, item) => sum + item.subtotal, 0);
-    const fee = 0;
+    const fee = calculateFee(subtotal);
     const grandTotal = subtotal + fee;
     const invoice = generateInvoice();
 
@@ -340,7 +457,7 @@ exports.waitingApproval = async (req, res) => {
       return res.redirect("/konsumen");
     }
 
-    if (transaction.status === "approved") {
+    if (transaction.status === "paid") {
       return res.redirect(`/konsumen/receipt/${invoice}`);
     }
 
@@ -348,6 +465,7 @@ exports.waitingApproval = async (req, res) => {
       pageTitle: "Waiting Approval",
       transaction: {
         ...transaction,
+        status_meta: getStatusMeta(transaction.status),
         grand_total_formatted: formatCurrency(transaction.grand_total),
         subtotal_formatted: formatCurrency(transaction.subtotal),
         created_at_formatted: formatDateTime(transaction.created_at)
@@ -367,9 +485,9 @@ exports.receipt = async (req, res) => {
   const { invoice } = req.params;
 
   try {
-    const transaction = await TransactionModel.getByInvoiceAndUser(invoice, req.session.user.id);
+    const receiptData = await getReceiptData(invoice, req.session.user.id);
 
-    if (!transaction) {
+    if (!receiptData) {
       setFlash(req, {
         type: "error",
         message: "Transaksi tidak ditemukan."
@@ -377,22 +495,14 @@ exports.receipt = async (req, res) => {
       return res.redirect("/konsumen");
     }
 
-    const items = await TransactionModel.getItemsByTransactionId(transaction.id);
+    if (receiptData.transaction.status !== "paid") {
+      return redirectUnpaidToStatus(req, res, receiptData.transaction);
+    }
 
     return res.render("konsumen/receipt", {
-      pageTitle: "Receipt",
-      transaction: {
-        ...transaction,
-        grand_total_formatted: formatCurrency(transaction.grand_total),
-        subtotal_formatted: formatCurrency(transaction.subtotal),
-        fee_formatted: formatCurrency(transaction.fee),
-        created_at_formatted: formatDateTime(transaction.created_at)
-      },
-      items: items.map((item) => ({
-        ...item,
-        price_formatted: formatCurrency(item.price),
-        subtotal_formatted: formatCurrency(item.subtotal)
-      }))
+      pageTitle: "Struk Transaksi",
+      transaction: receiptData.transaction,
+      items: receiptData.items
     });
   } catch (error) {
     console.error("Receipt error:", error);
@@ -401,5 +511,69 @@ exports.receipt = async (req, res) => {
       message: "Gagal memuat receipt transaksi."
     });
     return res.redirect("/konsumen");
+  }
+};
+
+exports.downloadReceipt = async (req, res) => {
+  const { invoice } = req.params;
+
+  try {
+    const receiptData = await getReceiptData(invoice, req.session.user.id);
+
+    if (!receiptData) {
+      setFlash(req, {
+        type: "error",
+        message: "Transaksi tidak ditemukan."
+      });
+      return res.redirect("/konsumen/history");
+    }
+
+    if (receiptData.transaction.status !== "paid") {
+      return redirectUnpaidToStatus(req, res, receiptData.transaction);
+    }
+
+    const { transaction, items } = receiptData;
+    const doc = new PDFDocument({ margin: 36, size: [226, 640] });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="struk-${transaction.invoice}.pdf"`);
+    doc.pipe(res);
+
+    doc.fontSize(14).text("WARUNGPOS", { align: "center" });
+    doc.moveDown(0.2);
+    doc.fontSize(8).fillColor("#475569").text("Struk Transaksi", { align: "center" });
+    doc.text("Terima kasih sudah berbelanja", { align: "center" });
+    doc.fillColor("#111827");
+    doc.moveDown(0.8);
+    doc.fontSize(8).text("--------------------------------");
+    doc.text(`Invoice : ${transaction.invoice}`);
+    doc.text(`Tanggal : ${transaction.created_at_formatted}`);
+    doc.text(`Status  : ${transaction.status_meta.label}`);
+    doc.text(`Bayar   : ${transaction.payment_method || "-"}`);
+    doc.text("--------------------------------");
+    doc.moveDown(0.4);
+
+    items.forEach((item) => {
+      doc.fontSize(8).text(item.nama_produk || "Produk");
+      doc.text(`${item.qty} x ${formatCurrency(item.price)} = ${formatCurrency(item.subtotal)}`, {
+        align: "right"
+      });
+      doc.moveDown(0.3);
+    });
+
+    doc.text("--------------------------------");
+    doc.text(`Subtotal    ${transaction.subtotal_formatted}`, { align: "right" });
+    doc.text(`Fee         ${transaction.fee_formatted}`, { align: "right" });
+    doc.fontSize(10).text(`TOTAL       ${transaction.grand_total_formatted}`, { align: "right" });
+    doc.moveDown(0.8);
+    doc.fontSize(8).fillColor("#475569").text(transaction.status_meta.description, { align: "center" });
+    doc.moveDown(0.6);
+    doc.text("Simpan struk ini sebagai bukti transaksi.", { align: "center" });
+    doc.end();
+  } catch (error) {
+    console.error("Download receipt error:", error);
+    return res.status(500).render("errors/500", {
+      pageTitle: "Server Error"
+    });
   }
 };
