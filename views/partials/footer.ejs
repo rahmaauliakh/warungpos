@@ -1,0 +1,54 @@
+<% if (flash) { %>
+  <div id="toast-notification" class="fixed right-4 top-4 z-[100] max-w-sm rounded-2xl border px-4 py-3 text-sm shadow-lg <%= flash.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700' %>">
+    <div class="flex items-start gap-3">
+      <div class="flex-1">
+        <p class="font-semibold"><%= flash.type === 'success' ? 'Berhasil' : 'Perhatian' %></p>
+        <p class="mt-1"><%= flash.message %></p>
+      </div>
+      <button type="button" onclick="document.getElementById('toast-notification')?.remove()" class="text-current/70">x</button>
+    </div>
+  </div>
+<% } %>
+
+<script>
+  document.querySelectorAll("form").forEach((form) => {
+    if (form.dataset.enhanced === "true") {
+      return;
+    }
+
+    form.dataset.enhanced = "true";
+
+    if (form.dataset.confirm) {
+      form.addEventListener("submit", (event) => {
+        if (!window.confirm(form.dataset.confirm)) {
+          event.preventDefault();
+        }
+      });
+    }
+
+    form.addEventListener("submit", () => {
+      const submitButton = form.querySelector('button[type="submit"]');
+      if (!submitButton || submitButton.dataset.skipLoading === "true") {
+        return;
+      }
+
+      if (!submitButton.dataset.originalText) {
+        submitButton.dataset.originalText = submitButton.innerHTML;
+      }
+
+      submitButton.disabled = true;
+      submitButton.classList.add("opacity-70", "cursor-not-allowed");
+      submitButton.innerHTML = submitButton.dataset.loadingText || "Memproses...";
+    });
+  });
+
+  window.setTimeout(() => {
+    document.getElementById("toast-notification")?.remove();
+  }, 3200);
+</script>
+
+<% if (typeof extraScripts !== "undefined" && extraScripts) { %>
+  <%- extraScripts %>
+<% } %>
+</body>
+</html>

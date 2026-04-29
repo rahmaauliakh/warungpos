@@ -1,0 +1,366 @@
+<%- include("../partials/header", { pageTitle, bodyClass: "bg-slate-100 text-slate-900" }) %>
+  <div class="min-h-screen lg:flex">
+    <%- include("../partials/sidebar", {
+      sidebarTitle: "Operator Panel",
+      sidebarDescription: "Manajemen produk, stock, dan kategori dalam satu dashboard.",
+      sidebarLinks: [
+        { href: "/operator", label: "Product Management", short: "PM", matchPrefix: "/operator" },
+        { label: "Katalog", short: "KT" },
+        { label: "Inventory", short: "IV" }
+      ],
+      currentPath,
+      sessionUser
+    }) %>
+
+    <main class="flex-1">
+      <header class="border-b border-slate-200 bg-white/90 px-6 py-5 backdrop-blur">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-500">Admin dashboard</p>
+            <h2 class="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Operator Product Management</h2>
+            <p class="mt-2 text-sm text-slate-500">Kelola produk, harga, stock, kategori, dan aset gambar dari satu tampilan kerja.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              data-open-modal="create-modal"
+              class="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+              </svg>
+              Tambah Produk
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="px-6 py-6">
+        <div class="grid gap-5 xl:grid-cols-4">
+          <% stats.forEach((stat) => { %>
+            <article class="overflow-hidden rounded-3xl bg-white shadow-panel ring-1 ring-slate-200">
+              <div class="bg-gradient-to-r <%= stat.accent %> p-5 text-white">
+                <p class="text-sm font-medium text-white/80"><%= stat.label %></p>
+                <h3 class="mt-4 text-3xl font-semibold tracking-tight"><%= stat.value %></h3>
+              </div>
+              <div class="p-5">
+                <p class="text-sm text-slate-500"><%= stat.description %></p>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+
+        <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.7fr)]">
+          <section class="rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 class="text-xl font-semibold text-slate-950">Daftar Produk</h3>
+                <p class="mt-1 text-sm text-slate-500">Data produk dari tabel `products` dengan aksi CRUD dan update stock.</p>
+              </div>
+              <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                <%= products.length %> produk
+              </span>
+            </div>
+
+            <div class="mt-6 overflow-x-auto">
+              <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead>
+                  <tr class="text-left text-slate-500">
+                    <th class="pb-3 font-medium">ID</th>
+                    <th class="pb-3 font-medium">Nama Produk</th>
+                    <th class="pb-3 font-medium">Harga</th>
+                    <th class="pb-3 font-medium">Stock</th>
+                    <th class="pb-3 font-medium">Kategori</th>
+                    <th class="pb-3 font-medium">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <% if (products.length === 0) { %>
+                    <tr>
+                      <td colspan="6" class="py-8 text-center text-slate-500">Belum ada data produk.</td>
+                    </tr>
+                  <% } %>
+
+                  <% products.forEach((product) => { %>
+                    <tr class="align-top text-slate-700">
+                      <td class="py-4 font-semibold text-slate-900"><%= product.id %></td>
+                      <td class="py-4">
+                        <div class="flex items-center gap-3">
+                          <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-slate-100">
+                            <% if (product.gambar) { %>
+                              <img src="<%= product.gambar %>" alt="<%= product.nama_produk %>" class="h-full w-full object-cover">
+                            <% } else { %>
+                              <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-8-8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            <% } %>
+                          </div>
+                          <div>
+                            <p class="font-semibold text-slate-900"><%= product.nama_produk %></p>
+                            <p class="mt-1 text-xs text-slate-500"><%= product.gambar ? 'Gambar tersedia' : 'Tanpa gambar' %></p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="py-4 font-medium"><%= new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(product.harga) %></td>
+                      <td class="py-4">
+                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold <%= product.stock > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' %>">
+                          <%= product.stock %>
+                        </span>
+                      </td>
+                      <td class="py-4">
+                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                          <%= product.kategori %>
+                        </span>
+                      </td>
+                      <td class="py-4">
+                        <div class="flex flex-wrap gap-2">
+                          <button type="button" data-open-modal="edit-modal-<%= product.id %>" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
+                            Edit
+                          </button>
+                          <button type="button" data-open-modal="stock-modal-<%= product.id %>" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
+                            Update Stock
+                          </button>
+                          <form action="/operator/products/<%= product.id %>/delete" method="POST" data-confirm="Hapus produk ini?">
+                            <button type="submit" class="rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">
+                              Hapus
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="space-y-6">
+            <article class="rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
+              <h3 class="text-xl font-semibold text-slate-950">Kategori Produk</h3>
+              <p class="mt-1 text-sm text-slate-500">Kategori aktif yang terdeteksi dari data produk saat ini.</p>
+
+              <div class="mt-5 flex flex-wrap gap-2">
+                <% if (categories.length === 0) { %>
+                  <span class="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">Belum ada kategori</span>
+                <% } %>
+                <% categories.forEach((category) => { %>
+                  <span class="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"><%= category %></span>
+                <% }) %>
+              </div>
+            </article>
+
+            <article class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-6 text-white shadow-panel">
+              <p class="text-sm font-medium text-slate-300">Workflow</p>
+              <h3 class="mt-2 text-2xl font-semibold">Tambah, ubah, dan kontrol stock tanpa pindah halaman.</h3>
+              <p class="mt-3 text-sm leading-6 text-slate-300">
+                Form modal sudah menyiapkan input nama produk, harga, stock, kategori, dan gambar opsional agar operator bisa kerja cepat.
+              </p>
+            </article>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="create-modal" data-modal-overlay class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
+    <div class="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-panel">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h3 class="text-2xl font-semibold text-slate-950">Tambah Produk</h3>
+          <p class="mt-1 text-sm text-slate-500">Masukkan detail produk baru ke katalog.</p>
+        </div>
+        <button type="button" data-close-modal="create-modal" class="rounded-xl bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form action="/operator/products" method="POST" class="mt-6 grid gap-4 md:grid-cols-2">
+        <div class="md:col-span-2">
+          <label class="mb-2 block text-sm font-medium text-slate-700">Nama Produk</label>
+          <input type="text" name="nama_produk" value="<%= formData.nama_produk || '' %>" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400" required>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700">Harga</label>
+          <input type="number" min="0" name="harga" value="<%= formData.harga || '' %>" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400" required>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700">Stock</label>
+          <input type="number" min="0" step="1" name="stock" value="<%= formData.stock || '' %>" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400" required>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700">Kategori</label>
+          <input type="text" name="kategori" value="<%= formData.kategori || '' %>" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400" required>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700">Gambar (opsional)</label>
+          <input type="text" name="gambar" value="<%= formData.gambar || '' %>" placeholder="URL gambar produk" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400">
+        </div>
+        <div class="md:col-span-2 flex justify-end gap-3 pt-2">
+          <button type="button" data-close-modal="create-modal" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">Batal</button>
+          <button type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">Simpan Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <% products.forEach((product) => { %>
+    <div id="edit-modal-<%= product.id %>" data-modal-overlay class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
+      <div class="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-panel">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-2xl font-semibold text-slate-950">Edit Produk</h3>
+            <p class="mt-1 text-sm text-slate-500">Perbarui data produk <%= product.nama_produk %>.</p>
+          </div>
+          <button type="button" data-close-modal="edit-modal-<%= product.id %>" class="rounded-xl bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form action="/operator/products/<%= product.id %>/update" method="POST" class="mt-6 grid gap-4 md:grid-cols-2">
+          <div class="md:col-span-2">
+            <label class="mb-2 block text-sm font-medium text-slate-700">Nama Produk</label>
+            <input
+              type="text"
+              name="nama_produk"
+              value="<%= activeModal === 'edit' && Number(activeProductId) === Number(product.id) ? (formData.nama_produk || '') : product.nama_produk %>"
+              class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
+              required
+            >
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-medium text-slate-700">Harga</label>
+            <input
+              type="number"
+              min="0"
+              name="harga"
+              value="<%= activeModal === 'edit' && Number(activeProductId) === Number(product.id) ? (formData.harga || '') : product.harga %>"
+              class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
+              required
+            >
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-medium text-slate-700">Stock</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              name="stock"
+              value="<%= activeModal === 'edit' && Number(activeProductId) === Number(product.id) ? (formData.stock || '') : product.stock %>"
+              class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
+              required
+            >
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-medium text-slate-700">Kategori</label>
+            <input
+              type="text"
+              name="kategori"
+              value="<%= activeModal === 'edit' && Number(activeProductId) === Number(product.id) ? (formData.kategori || '') : product.kategori %>"
+              class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
+              required
+            >
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-medium text-slate-700">Gambar (opsional)</label>
+            <input
+              type="text"
+              name="gambar"
+              value="<%= activeModal === 'edit' && Number(activeProductId) === Number(product.id) ? (formData.gambar || '') : (product.gambar || '') %>"
+              class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
+            >
+          </div>
+          <div class="md:col-span-2 flex justify-end gap-3 pt-2">
+            <button type="button" data-close-modal="edit-modal-<%= product.id %>" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">Batal</button>
+            <button type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">Update Produk</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="stock-modal-<%= product.id %>" data-modal-overlay class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
+      <div class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-panel">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-2xl font-semibold text-slate-950">Update Stock</h3>
+            <p class="mt-1 text-sm text-slate-500">Perbarui stock untuk <%= product.nama_produk %>.</p>
+          </div>
+          <button type="button" data-close-modal="stock-modal-<%= product.id %>" class="rounded-xl bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form action="/operator/products/<%= product.id %>/stock" method="POST" class="mt-6 space-y-4">
+          <div>
+            <label class="mb-2 block text-sm font-medium text-slate-700">Stock Baru</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              name="stock"
+              value="<%= activeModal === 'stock' && Number(activeProductId) === Number(product.id) ? (formData.stock || '') : product.stock %>"
+              class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
+              required
+            >
+          </div>
+          <div class="flex justify-end gap-3 pt-2">
+            <button type="button" data-close-modal="stock-modal-<%= product.id %>" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">Batal</button>
+            <button type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">Simpan Stock</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <% }) %>
+
+  <script>
+    const openModal = (modalId) => {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    };
+
+    const closeModal = (modalId) => {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    document.querySelectorAll("[data-open-modal]").forEach((button) => {
+      button.addEventListener("click", () => openModal(button.dataset.openModal));
+    });
+
+    document.querySelectorAll("[data-close-modal]").forEach((button) => {
+      button.addEventListener("click", () => closeModal(button.dataset.closeModal));
+    });
+
+    document.querySelectorAll("[data-modal-overlay]").forEach((modal) => {
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeModal(modal.id);
+        }
+      });
+    });
+
+    <% if (activeModal === "create") { %>
+      openModal("create-modal");
+    <% } %>
+
+    <% if (activeModal === "edit" && activeProductId) { %>
+      openModal("edit-modal-<%= activeProductId %>");
+    <% } %>
+
+    <% if (activeModal === "stock" && activeProductId) { %>
+      openModal("stock-modal-<%= activeProductId %>");
+    <% } %>
+  </script>
+<%- include("../partials/footer", { flash }) %>

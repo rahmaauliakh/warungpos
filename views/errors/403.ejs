@@ -1,0 +1,12 @@
+<%- include("../partials/header", { pageTitle, bodyClass: "min-h-screen bg-slate-100 text-slate-900" }) %>
+<main class="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-4 py-10 sm:px-6">
+  <section class="w-full rounded-[32px] bg-white px-8 py-12 text-center shadow-panel ring-1 ring-slate-200">
+    <p class="text-sm font-medium uppercase tracking-[0.35em] text-amber-400">403</p>
+    <h1 class="mt-4 text-4xl font-semibold tracking-tight text-slate-950">Access Denied</h1>
+    <p class="mt-4 text-sm leading-6 text-slate-500">Anda tidak memiliki akses ke halaman untuk role <strong><%= requestedRole %></strong>.</p>
+    <div class="mt-8">
+      <a href="<%= fallbackPath || '/' %>" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">Kembali</a>
+    </div>
+  </section>
+</main>
+<%- include("../partials/footer") %>

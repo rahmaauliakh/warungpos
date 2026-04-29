@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">
+  <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <section class="overflow-hidden rounded-[32px] bg-white shadow-[0_32px_80px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-8 text-white sm:px-10">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[0.35em] text-emerald-100">WarungPOS</p>
+            <h1 class="mt-2 text-3xl font-semibold tracking-tight">Receipt Transaksi</h1>
+            <p class="mt-3 text-sm text-emerald-50">Transaksi sudah disetujui dan siap diproses lebih lanjut.</p>
+          </div>
+          <span class="inline-flex w-fit rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/25">
+            <%= transaction.status %>
+          </span>
+        </div>
+      </div>
+
+      <div class="px-6 py-8 sm:px-10">
+        <div class="grid gap-4 sm:grid-cols-4">
+          <article class="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200">
+            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Invoice</p>
+            <p class="mt-3 break-all text-sm font-semibold text-slate-950"><%= transaction.invoice %></p>
+          </article>
+          <article class="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200">
+            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Subtotal</p>
+            <p class="mt-3 text-sm font-semibold text-slate-950"><%= transaction.subtotal_formatted %></p>
+          </article>
+          <article class="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200">
+            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Fee</p>
+            <p class="mt-3 text-sm font-semibold text-slate-950"><%= transaction.fee_formatted %></p>
+          </article>
+          <article class="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200">
+            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Grand Total</p>
+            <p class="mt-3 text-sm font-semibold text-slate-950"><%= transaction.grand_total_formatted %></p>
+          </article>
+        </div>
+
+        <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+              <tr class="text-left text-slate-500">
+                <th class="px-5 py-4 font-medium">Produk</th>
+                <th class="px-5 py-4 font-medium">Qty</th>
+                <th class="px-5 py-4 font-medium">Harga</th>
+                <th class="px-5 py-4 font-medium">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              <% items.forEach((item) => { %>
+                <tr>
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-slate-100">
+                        <% if (item.gambar) { %>
+                          <img src="<%= item.gambar %>" alt="<%= item.nama_produk %>" class="h-full w-full object-cover">
+                        <% } else { %>
+                          <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-8-8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        <% } %>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-950"><%= item.nama_produk || 'Produk' %></p>
+                        <p class="mt-1 text-xs text-slate-500"><%= item.kategori || 'Umum' %></p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-slate-700"><%= item.qty %></td>
+                  <td class="px-5 py-4 text-slate-700"><%= item.price_formatted %></td>
+                  <td class="px-5 py-4 font-semibold text-slate-950"><%= item.subtotal_formatted %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="/konsumen" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            Belanja Lagi
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

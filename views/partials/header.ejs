@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <% if (typeof includeChartJs !== "undefined" && includeChartJs) { %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <% } %>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#0f172a",
+            mist: "#f8fafc",
+            line: "#e2e8f0",
+            brand: "#0f172a",
+            paper: "#f8fafc",
+            accent: "#0f172a"
+          },
+          boxShadow: {
+            soft: "0 20px 45px rgba(15, 23, 42, 0.08)",
+            panel: "0 24px 60px rgba(15, 23, 42, 0.08)"
+          }
+        }
+      }
+    };
+  </script>
+  <% if (typeof extraHead !== "undefined" && extraHead) { %>
+    <%- extraHead %>
+  <% } %>
+</head>
+<body class="<%= bodyClass || 'bg-slate-100 text-slate-900' %>">
