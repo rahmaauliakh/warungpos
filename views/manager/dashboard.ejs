@@ -4,10 +4,7 @@
       sidebarTitle: "Manager Panel",
       sidebarDescription: "Pantau KPI, transaksi, performa kasir, dan export laporan dari satu dashboard.",
       sidebarLinks: [
-        { href: "/manager", label: "Dashboard", short: "DB", matchPrefix: "/manager" },
-        { label: "Laporan", short: "LP" },
-        { label: "Operasional", short: "OP" },
-        { label: "Aktivitas", short: "AK" }
+        { href: `/manager?filter=${activeFilter}#dashboard`, label: "Dashboard", short: "DB", matchPrefix: "/manager" }
       ],
       currentPath,
       sessionUser
@@ -45,7 +42,7 @@
         </div>
       </header>
 
-      <section class="px-6 py-6">
+      <section id="dashboard" class="px-6 py-6 scroll-mt-6">
         <% if (typeof dashboardError !== 'undefined' && dashboardError) { %>
           <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
             <%= dashboardError %>
@@ -66,13 +63,26 @@
           <% }) %>
         </div>
 
-        <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <section class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
+        <div class="mt-6 space-y-6">
+          <section id="laporan" class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 scroll-mt-6">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-xl font-semibold text-slate-950">Penjualan 7 Hari Terakhir</h3>
-                <p class="mt-1 text-sm text-slate-500">Grafik total penjualan transaksi paid per hari.</p>
+                <h3 class="text-xl font-semibold text-slate-950">Laporan Penjualan</h3>
+                <p class="mt-1 text-sm text-slate-500">
+                  <% if (activeFilter === "today") { %>
+                    Grafik total penjualan transaksi paid per jam untuk hari ini.
+                  <% } else if (activeFilter === "week") { %>
+                    Grafik total penjualan transaksi paid untuk rentang minggu ini.
+                  <% } else if (activeFilter === "month") { %>
+                    Grafik total penjualan transaksi paid untuk rentang bulan ini.
+                  <% } else { %>
+                    Grafik total penjualan transaksi paid untuk seluruh data yang tersedia.
+                  <% } %>
+                </p>
               </div>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                <%= chartRangeLabel %>
+              </span>
             </div>
 
             <% if (chartData.labels.length === 0 || chartData.totals.every((value) => Number(value) === 0)) { %>
@@ -92,14 +102,14 @@
             <% } %>
           </section>
 
-          <section class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
+          <section id="aktivitas" class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 scroll-mt-6">
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="text-xl font-semibold text-slate-950">Transaksi Terbaru</h3>
-                <p class="mt-1 text-sm text-slate-500">10 transaksi terbaru dari sistem pembayaran.</p>
+                <p class="mt-1 text-sm text-slate-500">6 transaksi per halaman sesuai filter periode yang dipilih.</p>
               </div>
               <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                <%= recentTransactions.length %> data
+                <%= recentTransactionsPagination.totalItems %> data
               </span>
             </div>
 
@@ -151,13 +161,34 @@
                 </tbody>
               </table>
             </div>
+            <% if (recentTransactionsPagination.totalPages > 1) { %>
+              <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
+                <p class="text-sm text-slate-500">
+                  Halaman <%= recentTransactionsPagination.currentPage %> dari <%= recentTransactionsPagination.totalPages %>
+                </p>
+                <div class="flex items-center gap-2">
+                  <a
+                    href="/manager?filter=<%= activeFilter %>&recentPage=<%= Math.max(1, recentTransactionsPagination.currentPage - 1) %>#aktivitas"
+                    class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold transition <%= recentTransactionsPagination.currentPage === 1 ? 'pointer-events-none bg-slate-100 text-slate-400' : 'bg-white text-slate-700 hover:bg-slate-50' %>"
+                  >
+                    Sebelumnya
+                  </a>
+                  <a
+                    href="/manager?filter=<%= activeFilter %>&recentPage=<%= Math.min(recentTransactionsPagination.totalPages, recentTransactionsPagination.currentPage + 1) %>#aktivitas"
+                    class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold transition <%= recentTransactionsPagination.currentPage === recentTransactionsPagination.totalPages ? 'pointer-events-none bg-slate-100 text-slate-400' : 'bg-white text-slate-700 hover:bg-slate-50' %>"
+                  >
+                    Berikutnya
+                  </a>
+                </div>
+              </div>
+            <% } %>
             <% } %>
           </section>
 
-          <section class="space-y-6">
+          <section id="operasional" class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] scroll-mt-6">
             <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
               <h3 class="text-xl font-semibold text-slate-950">Monitor Kasir</h3>
-              <p class="mt-1 text-sm text-slate-500">Performa kasir berdasarkan transaksi paid.</p>
+              <p class="mt-1 text-sm text-slate-500">Performa kasir berdasarkan transaksi paid pada periode yang sedang dipilih.</p>
 
               <% if (cashierMonitor.length === 0) { %>
                 <div class="mt-5 rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">

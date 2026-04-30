@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarungPOS - Solusi Kasir UMKM Modern</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FFFFFF;
+            color: #1E293B;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .sidebar-active {
+            background-color: #2563EB;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        /* Tooltip Style */
+        .tooltip-trigger:hover .tooltip-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Hero Animation */
+        .hero-float {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- LANDING PAGE SECTION -->
+    <div id="landing-page" class="relative">
+
+        <!-- 1. STICKY HEADER -->
+        <header class="fixed top-0 left-0 right-0 z-[100] glass px-6 lg:px-16 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="p-2 bg-blue-600 rounded-lg text-white">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                </div>
+                <span class="text-2xl font-bold tracking-tight text-gray-900">WarungPOS</span>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
+                <a href="#fitur" class="hover:text-blue-600 transition">Fitur</a>
+                <a href="#cara-kerja" class="hover:text-blue-600 transition">Cara Kerja</a>
+                <a href="#harga" class="hover:text-blue-600 transition">Harga</a>
+                <a href="#ekosistem" class="hover:text-blue-600 transition">Ekosistem</a>
+            </nav>
+
+            <a href="/login"
+                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-lg shadow-blue-100 flex items-center gap-2">
+                Masuk Dashboard
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            </a>
+        </header>
+
+        <!-- 2. HERO SECTION -->
+        <section class="pt-32 pb-20 px-6 lg:px-16 flex flex-col lg:flex-row items-center gap-16 overflow-hidden">
+            <div class="flex-1 space-y-8 animate-in slide-in-from-left duration-700">
+                <span
+                    class="px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">
+                    Sistem Kasir Terintegrasi v4.0
+                </span>
+                <h1 class="text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight">
+                    Solusi Kasir Digital Pintar untuk <span class="text-blue-600">UMKM Masa Kini.</span>
+                </h1>
+                <p class="text-lg text-gray-500 max-w-xl">
+                    Kelola transaksi offline dengan kecepatan tinggi dan integrasi perbankan otomatis. Ringan, Aman, dan
+                    Transparan untuk bisnis Anda.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="showLoginPage()"
+                        class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 transition shadow-xl shadow-blue-200">
+                        Coba Sekarang — Gratis
+                    </button>
+                    <a href="#cara-kerja"
+                        class="px-8 py-4 bg-white border border-gray-200 text-gray-600 rounded-2xl font-bold text-lg hover:bg-gray-50 transition">
+                        Pelajari Workflow
+                    </a>
+                </div>
+                <div class="flex items-center gap-6 pt-4">
+                    <div class="flex -space-x-3">
+                        <div
+                            class="w-10 h-10 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-xs font-bold">
+                            A</div>
+                        <div
+                            class="w-10 h-10 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-xs font-bold">
+                            B</div>
+                        <div
+                            class="w-10 h-10 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-xs font-bold">
+                            C</div>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium">Dipercaya oleh 2,500+ Pemilik Toko & Warung</p>
+                </div>
+            </div>
+            <div class="flex-1 relative animate-in slide-in-from-right duration-700">
+                <div class="hero-float relative z-10 bg-white p-2 rounded-[2.5rem] shadow-2xl border border-gray-100">
+                    <!-- Mockup Look -->
+                    <div class="rounded-[2rem] overflow-hidden border border-gray-200">
+                        <img src="https://images.unsplash.com/photo-1556742049-04ff4f6a0249?auto=format&fit=crop&q=80&w=800"
+                            alt="Dashboard Preview" class="w-full">
+                    </div>
+                </div>
+                <!-- Background decorative elements -->
+                <div class="absolute -top-10 -right-10 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-60"></div>
+                <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-indigo-100 rounded-full blur-3xl opacity-60">
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. KEUNGGULAN (THE WHY) -->
+        <section id="fitur" class="py-24 px-6 lg:px-16 bg-gray-50/50">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Mengapa Memilih WarungPOS?</h2>
+                <p class="text-gray-500">Kami menghadirkan fitur enterprise yang didesain khusus agar mudah digunakan
+                    oleh pedagang kecil dan menengah.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div
+                    class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div
+                        class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <i data-lucide="link-2" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Integrasi SmartBank</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Pembayaran diproses secara real-time melalui API
+                        Gateway resmi yang terhubung langsung ke saldo perbankan Anda.</p>
+                </div>
+                <div
+                    class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div
+                        class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-emerald-600 group-hover:text-white transition">
+                        <i data-lucide="refresh-cw" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Manajemen Stok Otomatis</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Stok barang berkurang otomatis setiap ada transaksi
+                        sukses, memberikan notifikasi saat barang hampir habis.</p>
+                </div>
+                <div
+                    class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div
+                        class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-indigo-600 group-hover:text-white transition">
+                        <i data-lucide="shield-check" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Keamanan JWT</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Data transaksi dilindungi dengan validasi token
+                        keamanan tingkat tinggi, menjaga kerahasiaan data keuangan Anda.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. TUTORIAL WORKFLOW -->
+        <section id="cara-kerja" class="py-24 px-6 lg:px-16">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="flex-1">
+                    <img src="https://images.unsplash.com/photo-1556740734-7f9a2b7a0f40?auto=format&fit=crop&q=80&w=800"
+                        alt="Tutorial" class="rounded-[2.5rem] shadow-2xl border border-gray-100">
+                </div>
+                <div class="flex-1 space-y-10">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Cara Kerja WarungPOS</h2>
+                        <p class="text-gray-500">Alur transaksi yang sangat sederhana, siapapun bisa mengoperasikannya
+                            dalam hitungan menit.</p>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="flex gap-6">
+                            <div
+                                class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
+                                1</div>
+                            <div>
+                                <h5 class="text-lg font-bold">Akses Terminal</h5>
+                                <p class="text-gray-500 text-sm">Login dan buka menu Kasir Terminal di perangkat apapun
+                                    (HP/Tablet/Laptop).</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6">
+                            <div
+                                class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
+                                2</div>
+                            <div>
+                                <h5 class="text-lg font-bold">Pilih Menu</h5>
+                                <p class="text-gray-500 text-sm">Klik pada katalog produk yang diinginkan pelanggan.
+                                    Hitungan otomatis real-time.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6">
+                            <div
+                                class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
+                                3</div>
+                            <div>
+                                <h5 class="text-lg font-bold">Proses Tagihan</h5>
+                                <p class="text-gray-500 text-sm">Klik "Tagihan" untuk hitung otomatis subtotal ditambah
+                                    1% biaya pemeliharaan layanan.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6">
+                            <div
+                                class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
+                                4</div>
+                            <div>
+                                <h5 class="text-lg font-bold">Selesaikan Pembayaran</h5>
+                                <p class="text-gray-500 text-sm">Klik "Bayar", sistem akan menghubungkan ke SmartBank
+                                    dan menyimpan histori selamanya.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. EKOSISTEM -->
+        <section id="ekosistem"
+            class="py-24 px-6 lg:px-16 bg-blue-600 text-white rounded-[4rem] mx-6 lg:mx-16 mb-24 relative overflow-hidden">
+            <div class="relative z-10 text-center space-y-12">
+                <div class="space-y-4">
+                    <h2 class="text-4xl font-extrabold">Bagian dari Ekosistem SmartGroup</h2>
+                    <p class="text-blue-100 text-lg opacity-80 max-w-2xl mx-auto">WarungPOS terhubung langsung dengan
+                        berbagai layanan handal untuk mendukung bisnis Anda.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20">
+                        <i data-lucide="landmark" class="w-10 h-10 mb-4 mx-auto"></i>
+                        <h4 class="text-xl font-bold mb-2">SmartBank</h4>
+                        <p class="text-sm opacity-80">Penyedia saldo, rekening bisnis, dan gerbang pembayaran instan.
+                        </p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20">
+                        <i data-lucide="key" class="w-10 h-10 mb-4 mx-auto"></i>
+                        <h4 class="text-xl font-bold mb-2">API Gateway</h4>
+                        <p class="text-sm opacity-80">Pintu masuk transaksi yang aman dengan enkripsi militer.</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20">
+                        <i data-lucide="bar-chart-3" class="w-10 h-10 mb-4 mx-auto"></i>
+                        <h4 class="text-xl font-bold mb-2">UMKM Insight</h4>
+                        <p class="text-sm opacity-80">Dashboard analisis keuntungan dan performa tokomu di satu tempat.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
+        </section>
+
+        <!-- 6. HARGA & PAKET -->
+        <section id="harga" class="py-24 px-6 lg:px-16">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-extrabold text-gray-900">Paket Langganan Merchant</h2>
+                <p class="text-gray-500 mt-2">Paket ini ditujukan untuk pemilik usaha yang memakai WarungPOS, bukan untuk akun konsumen pembeli.</p>
+            </div>
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Paket Gratis -->
+                <div class="bg-white border-2 border-gray-100 rounded-[2.5rem] p-8 hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-xl relative flex flex-col"
+                    onclick="choosePackageFromLanding('free')">
+                    <div class="mb-6">
+                        <span
+                            class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-widest">Basic</span>
+                        <h3 class="text-2xl font-bold mt-4">Gratis</h3>
+                        <p class="text-gray-500 mt-2">Cocok untuk pemilik usaha yang baru mulai digitalisasi operasional toko.</p>
+                    </div>
+                    <div class="text-4xl font-black text-gray-900 mb-8">Rp 0<span
+                            class="text-base font-normal text-gray-500">/selamanya</span></div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Akses semua fitur
+                                dasar</span></li>
+                        <li class="flex items-center gap-3"><i data-lucide="alert-circle"
+                                class="text-orange-500 w-5 h-5"></i><span
+                                class="text-gray-700 font-bold text-orange-600">Limit maksimal 10 transaksi</span></li>
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Dukungan komunitas</span>
+                        </li>
+                    </ul>
+                    <button
+                        class="w-full py-4 rounded-2xl font-bold border border-gray-200 text-gray-700 hover:bg-gray-50 transition">Konsultasi
+                        Paket Basic</button>
+                </div>
+
+                <!-- Paket Berbayar -->
+                <div class="bg-blue-600 border-2 border-blue-600 rounded-[2.5rem] p-8 hover:shadow-2xl hover:shadow-blue-200 transition-all cursor-pointer relative flex flex-col text-white"
+                    onclick="choosePackageFromLanding('paid')">
+                    <div
+                        class="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 text-xs font-black uppercase px-4 py-2 rounded-full shadow-lg transform rotate-3">
+                        Rekomendasi</div>
+                    <div class="mb-6">
+                        <span
+                            class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold uppercase tracking-widest">Pro</span>
+                        <h3 class="text-2xl font-bold mt-4">Berbayar</h3>
+                        <p class="text-blue-100 mt-2">Untuk merchant yang butuh transaksi tanpa limit dan dukungan prioritas.</p>
+                    </div>
+                    <div class="text-4xl font-black mb-8">Rp 99rb<span
+                            class="text-base font-normal text-blue-200">/bulan</span></div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                class="text-white w-5 h-5"></i><span>Akses semua fitur pro</span></li>
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                class="text-white w-5 h-5"></i><span class="font-bold">Transaksi sepuasnya (Tanpa
+                                Limit)</span></li>
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                class="text-white w-5 h-5"></i><span>Dukungan prioritas 24/7</span></li>
+                    </ul>
+                    <button
+                        class="w-full py-4 rounded-2xl font-bold bg-white text-blue-600 hover:bg-blue-50 transition shadow-lg">Hubungi
+                        Sales</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. FAQ -->
+        <section class="py-24 px-6 lg:px-16 max-w-4xl mx-auto">
+            <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-16">Pertanyaan Umum</h2>
+            <div class="space-y-4">
+                <details
+                    class="group bg-white rounded-3xl border border-gray-100 shadow-sm p-6 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between">
+                        <h4 class="text-lg font-bold text-gray-900">Apakah data transaksi saya aman?</h4>
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <p class="mt-4 text-gray-500 leading-relaxed">
+                        Sangat aman. Setiap transaksi divalidasi melalui API Gateway dengan enkripsi JWT (JSON Web
+                        Token), sehingga data keuangan Anda tidak dapat diakses oleh pihak luar.
+                    </p>
+                </details>
+                <details
+                    class="group bg-white rounded-3xl border border-gray-100 shadow-sm p-6 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between">
+                        <h4 class="text-lg font-bold text-gray-900">Apakah bisa digunakan melalui HP?</h4>
+                        <summary class="flex cursor-pointer items-center justify-between"></summary>
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <p class="mt-4 text-gray-500 leading-relaxed">
+                        Tentu saja. WarungPOS dirancang dengan desain responsif yang optimal untuk browser di
+                        smartphone, tablet, maupun desktop PC.
+                    </p>
+                </details>
+                <details
+                    class="group bg-white rounded-3xl border border-gray-100 shadow-sm p-6 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between">
+                        <h4 class="text-lg font-bold text-gray-900">Gimana cara tarik uangnya?</h4>
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <p class="mt-4 text-gray-500 leading-relaxed">
+                        Hasil penjualan akan langsung masuk ke akun SmartBank yang telah Anda hubungkan. Penarikan dana
+                        dapat dilakukan instan melalui dashboard SmartBank kapan saja.
+                    </p>
+                </details>
+            </div>
+        </section>
+
+        <!-- 8. FOOTER -->
+        <footer class="py-20 px-6 lg:px-16 bg-gray-900 text-white">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+                <div class="col-span-1 md:col-span-2 space-y-6">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-blue-600 rounded-lg text-white">
+                            <i data-lucide="zap" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-2xl font-bold tracking-tight">WarungPOS</span>
+                    </div>
+                    <p class="text-gray-400 max-w-sm">Mendigitalkan UMKM Indonesia dengan solusi kasir tercanggih, aman,
+                        dan tanpa biaya langganan.</p>
+                </div>
+                <div class="space-y-6">
+                    <h5 class="text-lg font-bold">Hubungi Kami</h5>
+                    <div class="space-y-4">
+                        <a href="mailto:help@warungpos.com"
+                            class="flex items-center gap-3 text-gray-400 hover:text-white transition">
+                            <i data-lucide="mail" class="w-5 h-5"></i>
+                            help@warungpos.com
+                        </a>
+                        <div class="flex gap-4">
+                            <div
+                                class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-blue-600 transition cursor-pointer">
+                                <i data-lucide="instagram" class="w-5 h-5"></i>
+                            </div>
+                            <div
+                                class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-blue-600 transition cursor-pointer">
+                                <i data-lucide="twitter" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <h5 class="text-lg font-bold">Produk Ekosistem</h5>
+                    <ul class="space-y-3 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition">SmartBank</a></li>
+                        <li><a href="#" class="hover:text-white transition">API Gateway</a></li>
+                        <li><a href="#" class="hover:text-white transition">Insight Dashboard</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-white/10 text-center text-gray-500 text-sm">
+                <p>© 2026 WarungPOS. Dikembangkan oleh <span class="text-white font-bold"> Revania, Ismi, Rahma</span>.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- LOGIN PAGE (Hidden by default) -->
+    <div id="login-page" class="hidden fixed inset-0 z-[200] bg-white flex items-center justify-center p-4">
+        <button onclick="hideLoginPage()"
+            class="absolute top-8 left-8 p-3 hover:bg-gray-100 rounded-2xl transition flex items-center gap-2 text-gray-600 font-bold">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            Kembali ke Beranda
+        </button>
+        <div
+            class="grid grid-cols-1 lg:grid-cols-2 w-full max-w-6xl h-[600px] rounded-[2.5rem] shadow-2xl overflow-hidden border">
+            <div class="hidden lg:block bg-blue-600 p-12 text-white relative overflow-hidden">
+                <div class="relative z-10 h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-8">
+                            <div class="p-2 bg-white rounded-lg">
+                                <i data-lucide="store" class="text-blue-600"></i>
+                            </div>
+                            <span class="text-2xl font-bold tracking-tight">WarungPOS</span>
+                        </div>
+                        <h1 class="text-4xl font-extrabold leading-tight">Solusi Kasir Pintar untuk UMKM Modern.</h1>
+                        <p class="mt-4 text-blue-100 text-lg">Kelola stok, transaksi, dan laporan dalam satu genggaman.
+                        </p>
+                    </div>
+                </div>
+                <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-blue-500 rounded-full blur-3xl opacity-50"></div>
+            </div>
+
+            <div class="p-8 lg:p-16 flex flex-col justify-center bg-white">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">Selamat Datang</h2>
+                    <p class="text-gray-500 mt-2">Silakan masuk ke akun kasir Anda.</p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email / Username</label>
+                        <input type="text" placeholder="admin@warungpos.com"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" placeholder="••••••••"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <button onclick="handleLogin()"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                        Masuk Sekarang
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP STRUCTURE -->
+    <div id="main-app" class="hidden h-screen flex overflow-hidden">
+
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-gray-100 flex flex-col overflow-y-auto custom-scrollbar">
+            <div class="p-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-600 rounded-lg text-white">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">WarungPOS</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 py-4 space-y-1 text-sm flex flex-col">
+                <button onclick="switchPage('dashboard')" id="nav-dashboard"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition sidebar-active">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Dashboard</span>
+                </button>
+                <button onclick="switchPage('kasir')" id="nav-kasir"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span class="font-medium">Kasir</span>
+                </button>
+                <button onclick="switchPage('produk')" id="nav-produk"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                    <i data-lucide="package" class="w-5 h-5"></i>
+                    <span class="font-medium">Produk</span>
+                </button>
+                <button onclick="switchPage('riwayat')" id="nav-riwayat"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                    <i data-lucide="history" class="w-5 h-5"></i>
+                    <span class="font-medium">Riwayat</span>
+                </button>
+                <button onclick="switchPage('about')" id="nav-about"
+                    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                    <span class="font-medium">Bantuan & Info</span>
+                </button>
+
+                <div class="mt-auto border-t border-gray-100 pt-4 pb-2 space-y-2">
+                    <div class="flex items-center gap-3 px-4 py-2">
+                        <div
+                            class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                            BS</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-bold text-gray-900 truncate">Budi Santoso</p>
+                            <button onclick="showUpgradeModal()"
+                                class="text-xs font-bold text-blue-600 hover:text-blue-700 transition flex items-center gap-1">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> Upgrade Fitur
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="location.reload()"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                        <span class="font-medium">Keluar</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-hidden">
+            <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8 z-10">
+                <h2 id="page-title" class="text-xl font-bold text-gray-800">Dashboard Kasir</h2>
+                <div class="flex items-center gap-3">
+                    <div id="transaction-limit-info" class="hidden"></div>
+                    <p class="text-sm font-bold text-gray-900">Budi Santoso</p>
+                    <div
+                        class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                        BS</div>
+                </div>
+            </header>
+
+            <div id="page-container" class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+
+                <!-- 1. DASHBOARD CONTENT -->
+                <div id="page-dashboard" class="page-content space-y-8 animate-in fade-in duration-500">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                            <p class="text-sm font-medium text-gray-500">Total Penjualan</p>
+                            <h3 class="text-2xl font-extrabold text-gray-900 mt-1">Rp 12.450.000</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                            <p class="text-sm font-medium text-gray-500">Jumlah Transaksi</p>
+                            <h3 class="text-2xl font-extrabold text-gray-900 mt-1">184</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm h-[350px]">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2. KASIR CONTENT -->
+                <div id="page-kasir" class="page-content hidden h-full">
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 h-full">
+                        <div class="xl:col-span-8 flex flex-col h-full space-y-6">
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <div class="flex-1 relative">
+                                    <i data-lucide="search"
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                                    <input type="text" id="productSearch" onkeyup="filterProducts()"
+                                        placeholder="Cari nama produk..."
+                                        class="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
+                            </div>
+                            <div id="productGrid"
+                                class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
+                                <!-- Products by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Cart Sidebar -->
+                        <div
+                            class="xl:col-span-4 bg-white rounded-3xl border border-gray-100 shadow-xl flex flex-col overflow-hidden">
+                            <div class="p-6 border-b border-gray-50 flex items-center justify-between">
+                                <h4 class="font-bold text-gray-900">Keranjang</h4>
+                                <button onclick="clearCart()"
+                                    class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">Hapus</button>
+                            </div>
+                            <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                                <div id="emptyCart"
+                                    class="h-full flex flex-col items-center justify-center text-gray-400 opacity-30">
+                                    <i data-lucide="shopping-cart" class="w-12 h-12 mb-2"></i>
+                                    <p class="font-medium">Kosong</p>
+                                </div>
+                            </div>
+                            <div class="p-6 bg-gray-50/50 space-y-3 border-t">
+                                <div class="flex justify-between text-sm text-gray-500">
+                                    <span>Subtotal</span>
+                                    <span id="subtotalLabel" class="font-bold text-gray-700">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-500 items-center">
+                                    <div class="relative tooltip-trigger flex items-center gap-1.5 cursor-help group">
+                                        <span>Fee Layanan POS</span>
+                                        <i data-lucide="info"
+                                            class="w-3 h-3 text-gray-400 group-hover:text-blue-600 transition"></i>
+                                        <div
+                                            class="tooltip-content absolute bottom-full left-0 mb-3 w-64 p-3 bg-gray-900 text-white text-[10px] leading-relaxed rounded-xl shadow-2xl opacity-0 visibility-hidden transform translate-y-2 transition-all duration-200 z-50 pointer-events-none">
+                                            <p class="font-bold text-blue-400 mb-1">Biaya Layanan (1%)</p>
+                                            <p class="opacity-80">Untuk biaya operasional terminal dan sinkronisasi
+                                                Cloud.</p>
+                                        </div>
+                                    </div>
+                                    <span id="feeLabel" class="font-bold text-gray-700">Rp 0</span>
+                                </div>
+                                <div class="pt-3 border-t border-gray-200 flex justify-between items-end">
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-400 uppercase">Total</p>
+                                        <p id="totalLabel" class="text-3xl font-extrabold text-blue-600">Rp 0</p>
+                                    </div>
+                                </div>
+                                <button onclick="handlePayment()"
+                                    class="w-full mt-4 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg flex items-center justify-center gap-2">
+                                    <i data-lucide="banknote" class="w-5 h-5"></i> Bayar Sekarang
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. RIWAYAT CONTENT -->
+                <div id="page-riwayat" class="page-content hidden">
+                    <p class="text-gray-500">Halaman Riwayat Transaksi.</p>
+                </div>
+
+                <!-- 4. PRODUK CONTENT -->
+                <div id="page-produk" class="page-content hidden">
+                    <p class="text-gray-500">Halaman Manajemen Produk.</p>
+                </div>
+
+                <!-- 5. ABOUT & BANTUAN CONTENT -->
+                <div id="page-about" class="page-content hidden animate-in fade-in duration-500">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Tentang Website & Developer -->
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                                    <i data-lucide="info" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-900">Tentang WarungPOS</h3>
+                            </div>
+                            <p class="text-gray-500 mb-8 leading-relaxed">
+                                WarungPOS adalah solusi kasir digital (Point of Sales) modern yang dirancang khusus
+                                untuk mempermudah UMKM dalam mengelola transaksi, stok barang, dan laporan penjualan
+                                secara efisien.
+                            </p>
+                            <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <i data-lucide="users" class="w-5 h-5 text-blue-500"></i> Tim Pengembang
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                                        RV</div>
+                                    <div>
+                                        <p class="font-bold text-gray-900">Revania Zahrani Ramadeani</p>
+                                        <p class="text-xs text-gray-500">Full Stack Engineer</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg">
+                                        IS</div>
+                                    <div>
+                                        <p class="font-bold text-gray-900">Ismi Nabilah</p>
+                                        <p class="text-xs text-gray-500">Full Stack Engineer</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg">
+                                        RH</div>
+                                    <div>
+                                        <p class="font-bold text-gray-900">Rahma Aulia Khoirunnisa</p>
+                                        <p class="text-xs text-gray-500">Full Stack Engineer</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pengaduan & Call Center -->
+                        <div
+                            class="bg-blue-600 p-8 rounded-[2.5rem] border border-blue-500 shadow-xl text-white relative overflow-hidden flex flex-col">
+                            <div
+                                class="absolute -bottom-10 -right-10 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-50">
+                            </div>
+                            <div class="relative z-10 flex-1 flex flex-col">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="p-3 bg-white/10 rounded-2xl">
+                                        <i data-lucide="headset" class="w-6 h-6"></i>
+                                    </div>
+                                    <h3 class="text-2xl font-bold">Pusat Bantuan</h3>
+                                </div>
+                                <p class="text-blue-100 mb-8 leading-relaxed">
+                                    Apakah Anda mengalami kendala transaksi, menemukan bug, atau memiliki pertanyaan
+                                    seputar layanan kami? Tim support kami siap membantu Anda 24/7.
+                                </p>
+
+                                <div class="space-y-4 mb-8">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                            <i data-lucide="phone" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-blue-200 uppercase tracking-wider font-bold mb-1">
+                                                Call Center</p>
+                                            <p class="font-bold text-lg">1500-123</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                            <i data-lucide="mail" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-blue-200 uppercase tracking-wider font-bold mb-1">
+                                                Email Support</p>
+                                            <p class="font-bold text-lg">help@warungpos.com</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="alert('Membuka WhatsApp Call Center...')"
+                                    class="mt-auto w-full py-4 bg-white text-blue-600 rounded-2xl font-bold hover:bg-blue-50 transition shadow-lg flex items-center justify-center gap-2">
+                                    <i data-lucide="message-circle" class="w-5 h-5"></i> Hubungi via WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: PAYMENT -->
+    <div id="modal-payment"
+        class="fixed inset-0 z-[300] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="max-w-md w-full bg-white rounded-[2.5rem] p-10 text-center animate-in zoom-in duration-300">
+            <div id="payment-processing">
+                <div
+                    class="w-20 h-20 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6">
+                </div>
+                <h2 class="text-2xl font-extrabold text-gray-900">Menunggu Pembayaran</h2>
+                <p class="text-gray-500 mt-2">Silakan selesaikan pembayaran di terminal SmartBank Anda.</p>
+                <div class="mt-8 p-6 bg-blue-50 rounded-2xl">
+                    <p id="paymentTotalAmount" class="text-3xl font-extrabold text-blue-700">Rp 0</p>
+                </div>
+                <button onclick="simulateSuccess()"
+                    class="mt-10 w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition">Simulasi
+                    Pembayaran Sukses</button>
+                <button onclick="closeModal('modal-payment')"
+                    class="mt-2 w-full py-3 text-gray-400 font-bold">Batalkan</button>
+            </div>
+            <div id="payment-success" class="hidden">
+                <div
+                    class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="check" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-gray-900">Transaksi Sukses!</h2>
+                <p class="text-gray-500 mt-2">Struk belanja sedang dicetak...</p>
+                <button onclick="newTransaction()"
+                    class="mt-10 w-full py-4 bg-blue-600 text-white rounded-2xl font-bold">Transaksi Baru</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: UPGRADE PACKAGE -->
+    <div id="modal-upgrade"
+        class="hidden fixed inset-0 z-[300] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full relative animate-in zoom-in duration-300">
+            <button onclick="closeModal('modal-upgrade')"
+                class="absolute -top-12 right-0 text-white hover:text-gray-200 transition flex items-center gap-2 font-bold">
+                <i data-lucide="x" class="w-6 h-6"></i> Tutup
+            </button>
+            <div class="bg-white rounded-[3rem] p-8 lg:p-12 shadow-2xl">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-extrabold text-gray-900">Upgrade Paket Layanan</h2>
+                    <p class="text-gray-500 mt-2">Pilih paket yang sesuai dengan kebutuhan bisnis Anda saat ini.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Paket Gratis -->
+                    <div class="bg-white border-2 border-gray-100 rounded-[2.5rem] p-8 hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-xl relative flex flex-col"
+                        onclick="upgradePackage('free')">
+                        <div class="mb-6">
+                            <span
+                                class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-widest">Basic</span>
+                            <h3 class="text-2xl font-bold mt-4">Gratis</h3>
+                            <p class="text-gray-500 mt-2">Cocok untuk pemula yang baru memulai bisnis.</p>
+                        </div>
+                        <div class="text-4xl font-black text-gray-900 mb-8">Rp 0<span
+                                class="text-base font-normal text-gray-500">/selamanya</span></div>
+                        <ul class="space-y-4 mb-8 flex-1">
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                    class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Akses semua fitur
+                                    dasar</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="alert-circle"
+                                    class="text-orange-500 w-5 h-5"></i><span
+                                    class="text-gray-700 font-bold text-orange-600">Limit maksimal 10 transaksi</span>
+                            </li>
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                    class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Dukungan
+                                    komunitas</span></li>
+                        </ul>
+                        <button
+                            class="w-full py-4 rounded-2xl font-bold border border-gray-200 text-gray-700 hover:bg-gray-50 transition">Pilih
+                            Gratis</button>
+                    </div>
+
+                    <!-- Paket Berbayar -->
+                    <div class="bg-blue-600 border-2 border-blue-600 rounded-[2.5rem] p-8 hover:shadow-2xl hover:shadow-blue-200 transition-all cursor-pointer relative flex flex-col text-white"
+                        onclick="upgradePackage('paid')">
+                        <div
+                            class="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 text-xs font-black uppercase px-4 py-2 rounded-full shadow-lg transform rotate-3">
+                            Rekomendasi</div>
+                        <div class="mb-6">
+                            <span
+                                class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold uppercase tracking-widest">Pro</span>
+                            <h3 class="text-2xl font-bold mt-4">Berbayar</h3>
+                            <p class="text-blue-100 mt-2">Untuk bisnis yang sedang berkembang pesat.</p>
+                        </div>
+                        <div class="text-4xl font-black mb-8">Rp 99rb<span
+                                class="text-base font-normal text-blue-200">/bulan</span></div>
+                        <ul class="space-y-4 mb-8 flex-1">
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                    class="text-white w-5 h-5"></i><span>Akses semua fitur pro</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                    class="text-white w-5 h-5"></i><span class="font-bold">Transaksi sepuasnya (Tanpa
+                                    Limit)</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle"
+                                    class="text-white w-5 h-5"></i><span>Dukungan prioritas 24/7</span></li>
+                        </ul>
+                        <button
+                            class="w-full py-4 rounded-2xl font-bold bg-white text-blue-600 hover:bg-blue-50 transition shadow-lg">Pilih
+                            Berbayar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { id: 1, name: 'Americano Ice', price: 15000, category: 'Minuman', emoji: '☕' },
+            { id: 2, name: 'Latte Hot', price: 18000, category: 'Minuman', emoji: '🥛' },
+            { id: 3, name: 'Croissant Coklat', price: 25000, category: 'Makanan', emoji: '🥐' },
+            { id: 4, name: 'Mineral Water', price: 5000, category: 'Minuman', emoji: '💧' },
+            { id: 5, name: 'Sandwich Egg', price: 32000, category: 'Makanan', emoji: '🥪' },
+            { id: 6, name: 'Cookies Vanilla', price: 12000, category: 'Snack', emoji: '🍪' }
+        ];
+
+        let cart = [];
+        const FEE_PERCENT = 0.01;
+
+        let currentPackage = null;
+        let transactionCount = 0;
+
+        window.onload = () => {
+            lucide.createIcons();
+            renderProducts();
+            initChart();
+        };
+
+        function showLoginPage() {
+            window.location.href = '/login';
+        }
+
+        function hideLoginPage() {
+            window.location.href = '/';
+        }
+
+        function choosePackageFromLanding(pkg) {
+            const subjects = {
+                free: 'Paket Basic WarungPOS',
+                paid: 'Paket Pro WarungPOS'
+            };
+            const subject = encodeURIComponent(subjects[pkg] || 'Paket WarungPOS');
+            window.location.href = `mailto:help@warungpos.com?subject=${subject}`;
+        }
+
+        function handleLogin() {
+            window.location.href = '/login';
+        }
+
+        function showUpgradeModal() {
+            document.getElementById('modal-upgrade').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function upgradePackage(pkg) {
+            currentPackage = pkg;
+            transactionCount = 0;
+            closeModal('modal-upgrade');
+            updateTransactionUI();
+            alert(`Paket berhasil diperbarui menjadi ${pkg === 'free' ? 'Gratis' : 'Pro'}.`);
+        }
+
+        function updateTransactionUI() {
+            const limitInfo = document.getElementById('transaction-limit-info');
+            if (!limitInfo) return;
+
+            limitInfo.classList.remove('hidden');
+            if (currentPackage === 'free') {
+                limitInfo.innerHTML = `<span class="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold border border-orange-200">Sisa Transaksi Gratis: ${10 - transactionCount}</span>`;
+            } else {
+                limitInfo.innerHTML = `<span class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold border border-blue-200">Paket Pro</span>`;
+            }
+        }
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('sidebar-active'));
+            document.getElementById(`nav-${pageId}`).classList.add('sidebar-active');
+            document.getElementById('page-title').innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1) + " Kasir";
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = products.map(p => `
+                <div onclick="addToCart(${p.id})" class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm hover:border-blue-500 transition cursor-pointer">
+                    <div class="w-full aspect-square bg-gray-50 rounded-2xl flex items-center justify-center text-4xl mb-4">${p.emoji}</div>
+                    <h5 class="font-bold text-gray-900 truncate">${p.name}</h5>
+                    <p class="text-sm font-extrabold text-blue-600">Rp ${p.price.toLocaleString('id-ID')}</p>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const inCart = cart.find(i => i.id === id);
+            if (inCart) inCart.qty++;
+            else cart.push({ ...product, qty: 1 });
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cartItems');
+            const empty = document.getElementById('emptyCart');
+            if (cart.length === 0) { container.innerHTML = ''; container.appendChild(empty); }
+            else {
+                container.innerHTML = cart.map(i => `
+                    <div class="flex items-center justify-between bg-gray-50 p-4 rounded-2xl">
+                        <div class="flex-1">
+                            <p class="text-sm font-bold truncate">${i.name}</p>
+                            <p class="text-xs text-blue-600 font-bold">${i.qty}x • Rp ${(i.price * i.qty).toLocaleString('id-ID')}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            const fee = subtotal * FEE_PERCENT;
+            document.getElementById('subtotalLabel').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+            document.getElementById('feeLabel').innerText = `Rp ${fee.toLocaleString('id-ID')}`;
+            document.getElementById('totalLabel').innerText = `Rp ${(subtotal + fee).toLocaleString('id-ID')}`;
+        }
+
+        function clearCart() { cart = []; updateCartUI(); }
+
+        function handlePayment() {
+            if (cart.length === 0) return;
+
+            if (currentPackage === 'free' && transactionCount >= 10) {
+                alert('Batas 10 transaksi untuk paket Gratis telah habis. Silakan upgrade ke paket Berbayar untuk transaksi sepuasnya.');
+                return;
+            }
+
+            const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            document.getElementById('paymentTotalAmount').innerText = `Rp ${(subtotal + (subtotal * FEE_PERCENT)).toLocaleString('id-ID')}`;
+            document.getElementById('modal-payment').classList.remove('hidden');
+        }
+
+        function simulateSuccess() {
+            transactionCount++;
+            updateTransactionUI();
+
+            document.getElementById('payment-processing').classList.add('hidden');
+            document.getElementById('payment-success').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function newTransaction() {
+            clearCart();
+            closeModal('modal-payment');
+            document.getElementById('payment-success').classList.add('hidden');
+            document.getElementById('payment-processing').classList.remove('hidden');
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function initChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    datasets: [{
+                        label: 'Penjualan (Juta Rp)',
+                        data: [1.2, 1.9, 1.5, 2.8, 3.5, 4.2, 3.8],
+                        borderColor: '#2563EB',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

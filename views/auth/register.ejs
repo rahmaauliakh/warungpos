@@ -3,158 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register</title>
+  <title>Register Konsumen WarungPOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+      color: #0f172a;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f3f4f6;
-      color: #1f2937;
       padding: 24px;
     }
-
-    .register-card {
+    .shell {
       width: 100%;
-      max-width: 460px;
+      max-width: 1120px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+      border-radius: 32px;
+      overflow: hidden;
       background: #ffffff;
-      padding: 32px;
-      border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.14);
     }
-
-    h1 {
-      margin: 0 0 24px;
-      font-size: 28px;
+    .brand {
+      padding: 56px;
+      background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 45%, #bfdbfe 100%);
+      color: #0f172a;
+      position: relative;
     }
-
-    .form-group {
+    .badge {
+      display: inline-flex;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.1);
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .brand h1 {
+      margin: 20px 0 14px;
+      font-size: 42px;
+      line-height: 1.1;
+    }
+    .brand p {
+      margin: 0;
+      max-width: 470px;
+      color: #334155;
+      line-height: 1.7;
+    }
+    .note-card {
+      margin-top: 32px;
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow: 0 16px 36px rgba(37, 99, 235, 0.08);
+    }
+    .note-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    .note-card p {
+      margin: 0;
+      font-size: 14px;
+      color: #475569;
+    }
+    .panel {
+      padding: 44px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .back-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    .panel h2 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.15;
+    }
+    .panel-copy {
+      margin: 10px 0 24px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .message {
       margin-bottom: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
     }
-
+    .form-group { margin-bottom: 14px; }
     label {
       display: block;
       margin-bottom: 8px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
+      color: #334155;
     }
-
     input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 14px;
+      padding: 14px 16px;
+      border: 1px solid #dbe4f0;
+      border-radius: 16px;
+      font: inherit;
+      color: #0f172a;
+      background: #f8fbff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
-
     input:focus {
       outline: none;
-      border-color: #2563eb;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
+      background: #ffffff;
     }
-
-    .error-message {
-      margin-bottom: 16px;
-      padding: 12px;
-      border-radius: 6px;
-      background: #fee2e2;
-      color: #b91c1c;
-      font-size: 14px;
-    }
-
     button {
       width: 100%;
-      padding: 12px;
+      margin-top: 10px;
+      padding: 14px 18px;
       border: 0;
-      border-radius: 6px;
-      background: #111827;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       color: #ffffff;
-      font-size: 14px;
-      font-weight: 600;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 800;
       cursor: pointer;
+      box-shadow: 0 18px 30px rgba(37, 99, 235, 0.22);
     }
-
     .auth-link {
-      margin-top: 16px;
+      margin-top: 18px;
       text-align: center;
       font-size: 14px;
-      color: #4b5563;
+      color: #64748b;
     }
-
     .auth-link a {
-      color: #111827;
-      font-weight: 600;
+      color: #1d4ed8;
+      font-weight: 800;
       text-decoration: none;
+    }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .brand { display: none; }
+      .panel { padding: 36px 24px; }
     }
   </style>
 </head>
 <body>
-  <div class="register-card">
-    <h1>Register</h1>
+  <div class="shell">
+    <section class="brand">
+      <span class="badge">Registrasi Konsumen</span>
+      <h1>Buat akun pelanggan untuk memesan dari katalog WarungPOS.</h1>
+      <p>Registrasi di halaman ini otomatis membuat akun dengan role `konsumen`. Jadi ini dipakai untuk pelanggan pembeli, bukan untuk pemilihan paket merchant atau onboarding pemilik usaha.</p>
 
-    <% if (error) { %>
-      <div class="error-message"><%= error %></div>
-    <% } %>
-
-    <form action="/register" method="POST">
-      <div class="form-group">
-        <label for="nama">Nama</label>
-        <input
-          type="text"
-          id="nama"
-          name="nama"
-          value="<%= oldInput.nama %>"
-          placeholder="Masukkan nama lengkap"
-          required
-        >
+      <div class="note-card">
+        <h3>Penting</h3>
+        <p>Paket `Free` dan `Pro` di landing page sebaiknya diarahkan ke proses sales atau onboarding merchant. Itu konsep langganan aplikasi, bukan role user transaksi di dalam aplikasi.</p>
       </div>
+    </section>
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value="<%= oldInput.email %>"
-          placeholder="Masukkan email"
-          required
-        >
-      </div>
+    <section class="panel">
+      <a href="/" class="back-link">Kembali ke Landing Page</a>
+      <h2>Daftar Akun Konsumen</h2>
+      <p class="panel-copy">Isi data berikut untuk membuat akun pelanggan dan mulai menggunakan katalog pembelian.</p>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Minimal 6 karakter"
-          required
-        >
-      </div>
+      <% if (error) { %>
+        <div class="message"><%= error %></div>
+      <% } %>
 
-      <div class="form-group">
-        <label for="confirmPassword">Konfirmasi Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          placeholder="Ulangi password"
-          required
-        >
-      </div>
+      <form action="/register" method="POST">
+        <div class="form-group">
+          <label for="nama">Nama</label>
+          <input
+            type="text"
+            id="nama"
+            name="nama"
+            value="<%= oldInput.nama %>"
+            placeholder="Masukkan nama lengkap"
+            required
+          >
+        </div>
 
-      <button type="submit">Daftar</button>
-    </form>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value="<%= oldInput.email %>"
+            placeholder="nama@email.com"
+            required
+          >
+        </div>
 
-    <p class="auth-link">
-      Sudah punya akun? <a href="/login">Login di sini</a>
-    </p>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Minimal 6 karakter"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Konfirmasi Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="Ulangi password"
+            required
+          >
+        </div>
+
+        <button type="submit">Daftar Sekarang</button>
+      </form>
+
+      <p class="auth-link">
+        Sudah punya akun? <a href="/login">Login di sini</a>
+      </p>
+    </section>
   </div>
 </body>
 </html>

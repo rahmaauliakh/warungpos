@@ -39,14 +39,28 @@
               Cari produk, filter kategori, lalu tambahkan item ke cart dengan kontrol kuantitas langsung di samping katalog.
             </p>
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid gap-3">
             <div class="rounded-3xl bg-white/10 p-4">
+              <div class="flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-3xl bg-white/15 text-lg font-semibold text-white">
+                  <%= (sessionUser?.nama || sessionUser?.email || "K").trim().charAt(0).toUpperCase() %>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Profil Konsumen</p>
+                  <p class="mt-2 truncate text-lg font-semibold text-white"><%= sessionUser?.nama || "Konsumen" %></p>
+                  <p class="mt-1 truncate text-sm text-slate-300"><%= sessionUser?.email || "-" %></p>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-3xl bg-white/10 p-4">
               <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Produk</p>
               <p class="mt-2 text-2xl font-semibold"><%= products.length %></p>
-            </div>
-            <div class="rounded-3xl bg-white/10 p-4">
-              <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Cart</p>
-              <p class="mt-2 text-2xl font-semibold"><%= cart.totalQty %></p>
+              </div>
+              <div class="rounded-3xl bg-white/10 p-4">
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Cart</p>
+                <p class="mt-2 text-2xl font-semibold"><%= cart.totalQty %></p>
+              </div>
             </div>
           </div>
         </div>

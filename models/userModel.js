@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 exports.findByEmail = (email) => new Promise((resolve, reject) => {
   const query = `
-    SELECT id, name AS nama, email, password, role
+    SELECT id, COALESCE(nama, name) AS nama, email, password, role
     FROM users
     WHERE email = ?
     LIMIT 1
@@ -19,11 +19,11 @@ exports.findByEmail = (email) => new Promise((resolve, reject) => {
 
 exports.create = (user) => new Promise((resolve, reject) => {
   const query = `
-    INSERT INTO users (name, email, password, role)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO users (name, nama, email, password, role)
+    VALUES (?, ?, ?, ?, ?)
   `;
 
-  db.query(query, [user.nama, user.email, user.password, user.role], (error, results) => {
+  db.query(query, [user.nama, user.nama, user.email, user.password, user.role], (error, results) => {
     if (error) {
       return reject(error);
     }

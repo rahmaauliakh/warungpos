@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const { body } = require("express-validator");
 const authController = require("../controllers/authController");
 const { requireAuth } = require("../middleware/auth");
@@ -13,11 +14,11 @@ const ROLE_REDIRECTS = {
 };
 
 router.get("/", (req, res) => {
-  if (!req.session.user?.role) {
-    return res.redirect("/login");
+  if (req.session.user?.role) {
+    return res.redirect(ROLE_REDIRECTS[req.session.user.role] || "/login");
   }
 
-  return res.redirect(ROLE_REDIRECTS[req.session.user.role] || "/login");
+  return res.sendFile(path.join(__dirname, "..", "index.html"));
 });
 
 router.get("/login", authController.showLogin);

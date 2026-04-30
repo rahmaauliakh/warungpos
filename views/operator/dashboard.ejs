@@ -4,9 +4,7 @@
       sidebarTitle: "Operator Panel",
       sidebarDescription: "Manajemen produk, stock, dan kategori dalam satu dashboard.",
       sidebarLinks: [
-        { href: "/operator#produk", label: "Product Management", short: "PM", matchPrefix: "/operator" },
-        { href: "/operator#katalog", label: "Katalog", short: "KT" },
-        { href: "/operator#inventory", label: "Inventory", short: "IV" }
+        { href: "/operator", label: "Product Management", short: "PM", matchPrefix: "/operator" }
       ],
       currentPath,
       sessionUser
@@ -36,8 +34,8 @@
         </div>
       </header>
 
-      <section class="px-6 py-6">
-        <div id="inventory" class="scroll-mt-6 grid gap-5 xl:grid-cols-4">
+      <section id="product-management" class="px-6 py-6 scroll-mt-6">
+        <div class="grid gap-5 xl:grid-cols-4">
           <% stats.forEach((stat) => { %>
             <article class="overflow-hidden rounded-3xl bg-white shadow-panel ring-1 ring-slate-200">
               <div class="bg-gradient-to-r <%= stat.accent %> p-5 text-white">
@@ -52,11 +50,11 @@
         </div>
 
         <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.7fr)]">
-          <section id="produk" class="scroll-mt-6 rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
+          <section class="rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <h3 class="text-xl font-semibold text-slate-950">Daftar Produk</h3>
-                <p class="mt-1 text-sm text-slate-500">Data produk dari tabel `products` dengan aksi CRUD dan update stock.</p>
+                <h3 class="text-xl font-semibold text-slate-950">Product Management</h3>
+                <p class="mt-1 text-sm text-slate-500">Kelola data produk, harga, stock, kategori, dan aksi CRUD dari satu tempat.</p>
               </div>
               <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                 <%= products.length %> produk
@@ -136,7 +134,7 @@
           </section>
 
           <section class="space-y-6">
-            <article id="katalog" class="scroll-mt-6 rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
+            <article class="rounded-3xl bg-white p-6 shadow-panel ring-1 ring-slate-200">
               <h3 class="text-xl font-semibold text-slate-950">Kategori Produk</h3>
               <p class="mt-1 text-sm text-slate-500">Kategori aktif yang terdeteksi dari data produk saat ini.</p>
 
@@ -155,6 +153,10 @@
               <h3 class="mt-2 text-2xl font-semibold">Tambah, ubah, dan kontrol stock tanpa pindah halaman.</h3>
               <p class="mt-3 text-sm leading-6 text-slate-300">
                 Form modal sudah menyiapkan input nama produk, harga, stock, kategori, dan gambar opsional agar operator bisa kerja cepat.
+              </p>
+              <p class="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-xs leading-6 text-slate-200">
+                Contoh gambar file lokal: simpan file ke folder <span class="font-semibold text-white">public/images/</span>, lalu isi kolom gambar dengan path seperti
+                <span class="font-semibold text-white">/images/nasi-goreng.jpg</span>. Jadi tidak harus pakai URL Google atau link internet.
               </p>
             </article>
           </section>
@@ -196,7 +198,8 @@
         </div>
         <div>
           <label class="mb-2 block text-sm font-medium text-slate-700">Gambar (opsional)</label>
-          <input type="text" name="gambar" value="<%= formData.gambar || '' %>" placeholder="URL gambar produk" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400">
+          <input type="text" name="gambar" value="<%= formData.gambar || '' %>" placeholder="/images/contoh-produk.jpg atau https://..." class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400">
+          <p class="mt-2 text-xs text-slate-500">Bisa isi path file lokal dari folder `public`, contoh: `/images/es-teh.jpg`.</p>
         </div>
         <div class="md:col-span-2 flex justify-end gap-3 pt-2">
           <button type="button" data-close-modal="create-modal" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">Batal</button>
@@ -271,8 +274,10 @@
               type="text"
               name="gambar"
               value="<%= activeModal === 'edit' && Number(activeProductId) === Number(product.id) ? (formData.gambar || '') : (product.gambar || '') %>"
+              placeholder="/images/contoh-produk.jpg atau https://..."
               class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
             >
+            <p class="mt-2 text-xs text-slate-500">Contoh file lokal: `/images/nasi-goreng.jpg`.</p>
           </div>
           <div class="md:col-span-2 flex justify-end gap-3 pt-2">
             <button type="button" data-close-modal="edit-modal-<%= product.id %>" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">Batal</button>

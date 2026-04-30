@@ -55,6 +55,30 @@ const getManagerDateFilter = (filter) => {
   return "1 = 1";
 };
 
+const getManagerChartGroupConfig = (filter) => {
+  if (filter === "today") {
+    return {
+      selectExpr: "DATE_FORMAT(t.created_at, '%Y-%m-%d %H:00:00')",
+      groupExpr: "DATE_FORMAT(t.created_at, '%Y-%m-%d %H:00:00')",
+      alias: "sales_period"
+    };
+  }
+
+  if (filter === "all") {
+    return {
+      selectExpr: "DATE_FORMAT(t.created_at, '%Y-%m-%d')",
+      groupExpr: "DATE_FORMAT(t.created_at, '%Y-%m-%d')",
+      alias: "sales_period"
+    };
+  }
+
+  return {
+    selectExpr: "DATE_FORMAT(t.created_at, '%Y-%m-%d')",
+    groupExpr: "DATE_FORMAT(t.created_at, '%Y-%m-%d')",
+    alias: "sales_period"
+  };
+};
+
 exports.createTransactionWithItems = async ({ transaction, items }) => {
   try {
     await beginTransaction();
@@ -343,59 +367,13 @@ exports.updateStatus = async ({ transactionId, status, cashierId, allowedCurrent
       return { success: false, reason: "invalid_status", transaction };
     }
 
-    if (status === "approved" && Number(transaction.stock_deducted || 0) === 0) {
-      const items = await query(
-        `
-          SELECT product_id, qty
-          FROM transaction_items
-          WHERE transaction_id = ?
-        `,
-        [transactionId]
-      );
-
-      for (const item of items) {
-        const product = await getSingle(
-          `
-            SELECT id, nama_produk, stock
-            FROM products
-            WHERE id = ?
-            LIMIT 1
-          `,
-          [item.product_id]
-        );
-
-        if (!product) {
-          await rollback();
-          return { success: false, reason: "product_not_found" };
-        }
-
-        if (Number(product.stock) < Number(item.qty)) {
-          await rollback();
-          return {
-            success: false,
-            reason: "insufficient_stock",
-            productName: product.nama_produk
-          };
-        }
-
-        await query(
-          `
-            UPDATE products
-            SET stock = stock - ?
-            WHERE id = ?
-          `,
-          [item.qty, item.product_id]
-        );
-      }
-    }
-
     await query(
       `
         UPDATE transactions
         SET status = ?, cashier_id = ?, stock_deducted = ?
         WHERE id = ?
       `,
-      [status, cashierId, status === "approved" ? 1 : Number(transaction.stock_deducted || 0), transactionId]
+      [status, cashierId, Number(transaction.stock_deducted || 0), transactionId]
     );
 
     await commit();
@@ -511,7 +489,21 @@ exports.getManagerKpis = async (filter) => {
   );
 };
 
-exports.getManagerRecentTransactions = async (filter) => {
+exports.countManagerRecentTransactions = async (filter) => {
+  const dateCondition = getManagerDateFilter(filter);
+
+  const result = await getSingle(
+    `
+      SELECT COUNT(*) AS total
+      FROM transactions t
+      WHERE ${dateCondition}
+    `
+  );
+
+  return Number(result?.total || 0);
+};
+
+exports.getManagerRecentTransactions = async (filter, limit = 10, offset = 0) => {
   const dateCondition = getManagerDateFilter(filter);
 
   return query(
@@ -531,8 +523,10 @@ exports.getManagerRecentTransactions = async (filter) => {
       LEFT JOIN users c ON c.id = t.cashier_id
       WHERE ${dateCondition}
       ORDER BY t.created_at DESC, t.id DESC
-      LIMIT 10
-    `
+      LIMIT ?
+      OFFSET ?
+    `,
+    [limit, offset]
   );
 };
 
@@ -583,17 +577,20 @@ exports.getManagerCashierPerformance = async (filter) => {
   );
 };
 
-exports.getManagerSalesChart = async () => {
+exports.getManagerSalesChart = async (filter) => {
+  const dateCondition = getManagerDateFilter(filter);
+  const chartGroup = getManagerChartGroupConfig(filter);
+
   return query(
     `
       SELECT
-        DATE(t.created_at) AS sales_date,
+        ${chartGroup.selectExpr} AS ${chartGroup.alias},
         COALESCE(SUM(t.grand_total), 0) AS total_sales
       FROM transactions t
       WHERE t.status = 'paid'
-        AND DATE(t.created_at) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-      GROUP BY DATE(t.created_at)
-      ORDER BY sales_date ASC
+        AND ${dateCondition}
+      GROUP BY ${chartGroup.groupExpr}
+      ORDER BY ${chartGroup.alias} ASC
     `
   );
 };
