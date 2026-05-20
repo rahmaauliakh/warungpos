@@ -17,8 +17,15 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #FFFFFF;
+            background:
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.14), transparent 28%),
+                linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
             color: #1E293B;
+        }
+
+        .section-shell {
+            max-width: 1280px;
+            margin: 0 auto;
         }
 
         .glass {
@@ -56,6 +63,12 @@
         /* Hero Animation */
         .hero-float {
             animation: floating 3s ease-in-out infinite;
+        }
+
+        .soft-card {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06);
         }
 
         @keyframes floating {
@@ -101,42 +114,43 @@
         </header>
 
         <!-- 2. HERO SECTION -->
-        <section class="pt-32 pb-20 px-6 lg:px-16 flex flex-col lg:flex-row items-center gap-16 overflow-hidden">
+        <section class="pt-32 pb-20 px-6 lg:px-16 overflow-hidden">
+            <div class="section-shell flex flex-col lg:flex-row items-center gap-16">
             <div class="flex-1 space-y-8 animate-in slide-in-from-left duration-700">
                 <span
                     class="px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">
-                    Sistem Kasir Terintegrasi v4.0
+                    Sistem Kasir Modern untuk UMKM
                 </span>
                 <h1 class="text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight">
-                    Solusi Kasir Digital Pintar untuk <span class="text-blue-600">UMKM Masa Kini.</span>
+                    Kelola toko lebih rapi, cepat, dan nyaman dengan <span class="text-blue-600">WarungPOS.</span>
                 </h1>
                 <p class="text-lg text-gray-500 max-w-xl">
-                    Kelola transaksi offline dengan kecepatan tinggi dan integrasi perbankan otomatis. Ringan, Aman, dan
-                    Transparan untuk bisnis Anda.
+                    WarungPOS membantu Anda mengatur transaksi, stok, dan pemantauan penjualan dalam satu alur yang
+                    sederhana dan mudah dipakai setiap hari.
                 </p>
                 <div class="flex flex-wrap gap-4">
                     <button onclick="showLoginPage()"
                         class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 transition shadow-xl shadow-blue-200">
-                        Coba Sekarang — Gratis
+                        Mulai Sekarang
                     </button>
                     <a href="#cara-kerja"
                         class="px-8 py-4 bg-white border border-gray-200 text-gray-600 rounded-2xl font-bold text-lg hover:bg-gray-50 transition">
-                        Pelajari Workflow
+                        Lihat Cara Kerja
                     </a>
                 </div>
-                <div class="flex items-center gap-6 pt-4">
-                    <div class="flex -space-x-3">
-                        <div
-                            class="w-10 h-10 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-xs font-bold">
-                            A</div>
-                        <div
-                            class="w-10 h-10 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-xs font-bold">
-                            B</div>
-                        <div
-                            class="w-10 h-10 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-xs font-bold">
-                            C</div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 max-w-2xl">
+                    <div class="soft-card rounded-3xl p-5">
+                        <p class="text-2xl font-extrabold text-gray-900">Transaksi</p>
+                        <p class="mt-1 text-sm text-gray-500">Proses checkout lebih cepat dan tetap mudah dipantau.</p>
                     </div>
-                    <p class="text-sm text-gray-500 font-medium">Dipercaya oleh 2,500+ Pemilik Toko & Warung</p>
+                    <div class="soft-card rounded-3xl p-5">
+                        <p class="text-2xl font-extrabold text-gray-900">Stok</p>
+                        <p class="mt-1 text-sm text-gray-500">Pergerakan barang tercatat lebih rapi tanpa input berulang.</p>
+                    </div>
+                    <div class="soft-card rounded-3xl p-5">
+                        <p class="text-2xl font-extrabold text-gray-900">Laporan</p>
+                        <p class="mt-1 text-sm text-gray-500">Pemilik usaha lebih mudah membaca aktivitas penjualan.</p>
+                    </div>
                 </div>
             </div>
             <div class="flex-1 relative animate-in slide-in-from-right duration-700">
@@ -152,52 +166,55 @@
                 <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-indigo-100 rounded-full blur-3xl opacity-60">
                 </div>
             </div>
+            </div>
         </section>
 
         <!-- 3. KEUNGGULAN (THE WHY) -->
         <section id="fitur" class="py-24 px-6 lg:px-16 bg-gray-50/50">
+            <div class="section-shell">
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Mengapa Memilih WarungPOS?</h2>
-                <p class="text-gray-500">Kami menghadirkan fitur enterprise yang didesain khusus agar mudah digunakan
-                    oleh pedagang kecil dan menengah.</p>
+                <p class="text-gray-500">Fitur inti dirancang agar operasional harian terasa lebih ringan, tanpa
+                    tampilan yang membingungkan.</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <div
                     class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
                     <div
                         class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 group-hover:text-white transition">
-                        <i data-lucide="link-2" class="w-8 h-8"></i>
+                        <i data-lucide="credit-card" class="w-8 h-8"></i>
                     </div>
-                    <h4 class="text-xl font-bold mb-3">Integrasi SmartBank</h4>
-                    <p class="text-sm text-gray-500 leading-relaxed">Pembayaran diproses secara real-time melalui API
-                        Gateway resmi yang terhubung langsung ke saldo perbankan Anda.</p>
+                    <h4 class="text-xl font-bold mb-3">Transaksi Lebih Cepat</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Alur pembayaran dibuat singkat agar kasir bisa
+                        memproses pesanan tanpa banyak langkah yang tidak perlu.</p>
                 </div>
                 <div
                     class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
                     <div
                         class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-emerald-600 group-hover:text-white transition">
-                        <i data-lucide="refresh-cw" class="w-8 h-8"></i>
+                        <i data-lucide="package-check" class="w-8 h-8"></i>
                     </div>
-                    <h4 class="text-xl font-bold mb-3">Manajemen Stok Otomatis</h4>
-                    <p class="text-sm text-gray-500 leading-relaxed">Stok barang berkurang otomatis setiap ada transaksi
-                        sukses, memberikan notifikasi saat barang hampir habis.</p>
+                    <h4 class="text-xl font-bold mb-3">Stok Lebih Terkontrol</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Perubahan stok tercatat mengikuti aktivitas
+                        penjualan sehingga pemantauan barang terasa lebih konsisten.</p>
                 </div>
                 <div
                     class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
                     <div
                         class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-indigo-600 group-hover:text-white transition">
-                        <i data-lucide="shield-check" class="w-8 h-8"></i>
+                        <i data-lucide="bar-chart-3" class="w-8 h-8"></i>
                     </div>
-                    <h4 class="text-xl font-bold mb-3">Keamanan JWT</h4>
-                    <p class="text-sm text-gray-500 leading-relaxed">Data transaksi dilindungi dengan validasi token
-                        keamanan tingkat tinggi, menjaga kerahasiaan data keuangan Anda.</p>
+                    <h4 class="text-xl font-bold mb-3">Pantau Bisnis Lebih Jelas</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">Data penjualan dan aktivitas toko tersusun lebih
+                        mudah dibaca untuk pengambilan keputusan harian.</p>
                 </div>
+            </div>
             </div>
         </section>
 
         <!-- 4. TUTORIAL WORKFLOW -->
         <section id="cara-kerja" class="py-24 px-6 lg:px-16">
-            <div class="flex flex-col lg:flex-row items-center gap-16">
+            <div class="section-shell flex flex-col lg:flex-row items-center gap-16">
                 <div class="flex-1">
                     <img src="https://images.unsplash.com/photo-1556740734-7f9a2b7a0f40?auto=format&fit=crop&q=80&w=800"
                         alt="Tutorial" class="rounded-[2.5rem] shadow-2xl border border-gray-100">
@@ -205,8 +222,8 @@
                 <div class="flex-1 space-y-10">
                     <div>
                         <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Cara Kerja WarungPOS</h2>
-                        <p class="text-gray-500">Alur transaksi yang sangat sederhana, siapapun bisa mengoperasikannya
-                            dalam hitungan menit.</p>
+                        <p class="text-gray-500">Alurnya dibuat sederhana agar tim toko bisa langsung bekerja tanpa
+                            perlu adaptasi yang rumit.</p>
                     </div>
                     <div class="space-y-8">
                         <div class="flex gap-6">
@@ -214,9 +231,9 @@
                                 class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
                                 1</div>
                             <div>
-                                <h5 class="text-lg font-bold">Akses Terminal</h5>
-                                <p class="text-gray-500 text-sm">Login dan buka menu Kasir Terminal di perangkat apapun
-                                    (HP/Tablet/Laptop).</p>
+                                <h5 class="text-lg font-bold">Masuk ke Sistem</h5>
+                                <p class="text-gray-500 text-sm">Buka akun WarungPOS dari perangkat yang digunakan di
+                                    meja kasir atau area operasional.</p>
                             </div>
                         </div>
                         <div class="flex gap-6">
@@ -224,9 +241,9 @@
                                 class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
                                 2</div>
                             <div>
-                                <h5 class="text-lg font-bold">Pilih Menu</h5>
-                                <p class="text-gray-500 text-sm">Klik pada katalog produk yang diinginkan pelanggan.
-                                    Hitungan otomatis real-time.</p>
+                                <h5 class="text-lg font-bold">Pilih Produk</h5>
+                                <p class="text-gray-500 text-sm">Tambahkan produk yang dibeli pelanggan dan biarkan
+                                    sistem menghitung total secara otomatis.</p>
                             </div>
                         </div>
                         <div class="flex gap-6">
@@ -234,9 +251,9 @@
                                 class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
                                 3</div>
                             <div>
-                                <h5 class="text-lg font-bold">Proses Tagihan</h5>
-                                <p class="text-gray-500 text-sm">Klik "Tagihan" untuk hitung otomatis subtotal ditambah
-                                    1% biaya pemeliharaan layanan.</p>
+                                <h5 class="text-lg font-bold">Periksa Ringkasan Belanja</h5>
+                                <p class="text-gray-500 text-sm">Cek subtotal, jumlah item, dan rincian pembayaran
+                                    sebelum transaksi diselesaikan.</p>
                             </div>
                         </div>
                         <div class="flex gap-6">
@@ -244,9 +261,9 @@
                                 class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0 shadow-lg shadow-blue-100">
                                 4</div>
                             <div>
-                                <h5 class="text-lg font-bold">Selesaikan Pembayaran</h5>
-                                <p class="text-gray-500 text-sm">Klik "Bayar", sistem akan menghubungkan ke SmartBank
-                                    dan menyimpan histori selamanya.</p>
+                                <h5 class="text-lg font-bold">Selesaikan Transaksi</h5>
+                                <p class="text-gray-500 text-sm">Setelah pembayaran selesai, data transaksi tersimpan
+                                    dan bisa dilihat kembali kapan saja.</p>
                             </div>
                         </div>
                     </div>
@@ -259,26 +276,29 @@
             class="py-24 px-6 lg:px-16 bg-blue-600 text-white rounded-[4rem] mx-6 lg:mx-16 mb-24 relative overflow-hidden">
             <div class="relative z-10 text-center space-y-12">
                 <div class="space-y-4">
-                    <h2 class="text-4xl font-extrabold">Bagian dari Ekosistem SmartGroup</h2>
-                    <p class="text-blue-100 text-lg opacity-80 max-w-2xl mx-auto">WarungPOS terhubung langsung dengan
-                        berbagai layanan handal untuk mendukung bisnis Anda.</p>
+                    <h2 class="text-4xl font-extrabold">Satu alur kerja untuk operasional harian</h2>
+                    <p class="text-blue-100 text-lg opacity-80 max-w-2xl mx-auto">WarungPOS membantu tim toko bekerja
+                        lebih sinkron dari pencatatan transaksi sampai pemantauan penjualan.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20">
-                        <i data-lucide="landmark" class="w-10 h-10 mb-4 mx-auto"></i>
-                        <h4 class="text-xl font-bold mb-2">SmartBank</h4>
-                        <p class="text-sm opacity-80">Penyedia saldo, rekening bisnis, dan gerbang pembayaran instan.
+                        <i data-lucide="store" class="w-10 h-10 mb-4 mx-auto"></i>
+                        <h4 class="text-xl font-bold mb-2">Untuk Toko Harian</h4>
+                        <p class="text-sm opacity-80">Cocok dipakai untuk operasional warung, kedai, dan usaha kecil
+                            yang butuh alur kasir sederhana.
                         </p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20">
-                        <i data-lucide="key" class="w-10 h-10 mb-4 mx-auto"></i>
-                        <h4 class="text-xl font-bold mb-2">API Gateway</h4>
-                        <p class="text-sm opacity-80">Pintu masuk transaksi yang aman dengan enkripsi militer.</p>
+                        <i data-lucide="users" class="w-10 h-10 mb-4 mx-auto"></i>
+                        <h4 class="text-xl font-bold mb-2">Untuk Tim Operasional</h4>
+                        <p class="text-sm opacity-80">Membantu pemilik usaha dan tim bekerja dalam alur yang lebih
+                            tertib dan mudah dipahami.</p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20">
-                        <i data-lucide="bar-chart-3" class="w-10 h-10 mb-4 mx-auto"></i>
-                        <h4 class="text-xl font-bold mb-2">UMKM Insight</h4>
-                        <p class="text-sm opacity-80">Dashboard analisis keuntungan dan performa tokomu di satu tempat.
+                        <i data-lucide="line-chart" class="w-10 h-10 mb-4 mx-auto"></i>
+                        <h4 class="text-xl font-bold mb-2">Untuk Evaluasi Penjualan</h4>
+                        <p class="text-sm opacity-80">Ringkasan data membantu Anda melihat performa bisnis dengan lebih
+                            cepat.
                         </p>
                     </div>
                 </div>
@@ -289,9 +309,11 @@
 
         <!-- 6. HARGA & PAKET -->
         <section id="harga" class="py-24 px-6 lg:px-16">
+            <div class="section-shell">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-extrabold text-gray-900">Paket Langganan Merchant</h2>
-                <p class="text-gray-500 mt-2">Paket ini ditujukan untuk pemilik usaha yang memakai WarungPOS, bukan untuk akun konsumen pembeli.</p>
+                <h2 class="text-3xl font-extrabold text-gray-900">Pilih Paket yang Sesuai</h2>
+                <p class="text-gray-500 mt-2">Mulai dari kebutuhan dasar sampai operasional yang lebih aktif, pilih
+                    paket sesuai skala usaha Anda.</p>
             </div>
             <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Paket Gratis -->
@@ -301,19 +323,21 @@
                         <span
                             class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-widest">Basic</span>
                         <h3 class="text-2xl font-bold mt-4">Gratis</h3>
-                        <p class="text-gray-500 mt-2">Cocok untuk pemilik usaha yang baru mulai digitalisasi operasional toko.</p>
+                        <p class="text-gray-500 mt-2">Cocok untuk usaha yang baru mulai merapikan transaksi dan
+                            pencatatan toko.</p>
                     </div>
                     <div class="text-4xl font-black text-gray-900 mb-8">Rp 0<span
                             class="text-base font-normal text-gray-500">/selamanya</span></div>
                     <ul class="space-y-4 mb-8 flex-1">
                         <li class="flex items-center gap-3"><i data-lucide="check-circle"
-                                class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Akses semua fitur
-                                dasar</span></li>
+                                class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Fitur inti untuk
+                                operasional harian</span></li>
                         <li class="flex items-center gap-3"><i data-lucide="alert-circle"
                                 class="text-orange-500 w-5 h-5"></i><span
-                                class="text-gray-700 font-bold text-orange-600">Limit maksimal 10 transaksi</span></li>
+                                class="text-gray-700 font-bold text-orange-600">Batas penggunaan lebih terbatas</span></li>
                         <li class="flex items-center gap-3"><i data-lucide="check-circle"
-                                class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Dukungan komunitas</span>
+                                class="text-green-500 w-5 h-5"></i><span class="text-gray-700">Cocok untuk tahap
+                                awal digitalisasi</span>
                         </li>
                     </ul>
                     <button
@@ -331,23 +355,25 @@
                         <span
                             class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold uppercase tracking-widest">Pro</span>
                         <h3 class="text-2xl font-bold mt-4">Berbayar</h3>
-                        <p class="text-blue-100 mt-2">Untuk merchant yang butuh transaksi tanpa limit dan dukungan prioritas.</p>
+                        <p class="text-blue-100 mt-2">Untuk usaha yang membutuhkan pemakaian lebih aktif dan dukungan
+                            yang lebih siap.</p>
                     </div>
                     <div class="text-4xl font-black mb-8">Rp 99rb<span
                             class="text-base font-normal text-blue-200">/bulan</span></div>
                     <ul class="space-y-4 mb-8 flex-1">
                         <li class="flex items-center gap-3"><i data-lucide="check-circle"
-                                class="text-white w-5 h-5"></i><span>Akses semua fitur pro</span></li>
+                                class="text-white w-5 h-5"></i><span>Fitur lebih lengkap untuk pertumbuhan usaha</span></li>
                         <li class="flex items-center gap-3"><i data-lucide="check-circle"
-                                class="text-white w-5 h-5"></i><span class="font-bold">Transaksi sepuasnya (Tanpa
-                                Limit)</span></li>
+                                class="text-white w-5 h-5"></i><span class="font-bold">Penggunaan lebih fleksibel untuk
+                                operasional rutin</span></li>
                         <li class="flex items-center gap-3"><i data-lucide="check-circle"
-                                class="text-white w-5 h-5"></i><span>Dukungan prioritas 24/7</span></li>
+                                class="text-white w-5 h-5"></i><span>Dukungan prioritas</span></li>
                     </ul>
                     <button
                         class="w-full py-4 rounded-2xl font-bold bg-white text-blue-600 hover:bg-blue-50 transition shadow-lg">Hubungi
                         Sales</button>
                 </div>
+            </div>
             </div>
         </section>
 
@@ -364,15 +390,14 @@
                         </span>
                     </summary>
                     <p class="mt-4 text-gray-500 leading-relaxed">
-                        Sangat aman. Setiap transaksi divalidasi melalui API Gateway dengan enkripsi JWT (JSON Web
-                        Token), sehingga data keuangan Anda tidak dapat diakses oleh pihak luar.
+                        Data operasional tersimpan lebih rapi di dalam sistem sehingga aktivitas harian toko bisa
+                        dipantau dengan lebih aman dan terstruktur.
                     </p>
                 </details>
                 <details
                     class="group bg-white rounded-3xl border border-gray-100 shadow-sm p-6 [&_summary::-webkit-details-marker]:hidden">
                     <summary class="flex cursor-pointer items-center justify-between">
                         <h4 class="text-lg font-bold text-gray-900">Apakah bisa digunakan melalui HP?</h4>
-                        <summary class="flex cursor-pointer items-center justify-between"></summary>
                         <span class="shrink-0 transition duration-300 group-open:-rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
@@ -385,14 +410,14 @@
                 <details
                     class="group bg-white rounded-3xl border border-gray-100 shadow-sm p-6 [&_summary::-webkit-details-marker]:hidden">
                     <summary class="flex cursor-pointer items-center justify-between">
-                        <h4 class="text-lg font-bold text-gray-900">Gimana cara tarik uangnya?</h4>
+                        <h4 class="text-lg font-bold text-gray-900">Apakah cocok untuk usaha kecil?</h4>
                         <span class="shrink-0 transition duration-300 group-open:-rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
                     <p class="mt-4 text-gray-500 leading-relaxed">
-                        Hasil penjualan akan langsung masuk ke akun SmartBank yang telah Anda hubungkan. Penarikan dana
-                        dapat dilakukan instan melalui dashboard SmartBank kapan saja.
+                        Ya. Struktur halaman dan alur operasionalnya dirancang tetap mudah dipahami untuk warung,
+                        kedai, dan usaha yang baru membangun sistem kasir digital.
                     </p>
                 </details>
             </div>
@@ -400,7 +425,7 @@
 
         <!-- 8. FOOTER -->
         <footer class="py-20 px-6 lg:px-16 bg-gray-900 text-white">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+            <div class="section-shell grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
                 <div class="col-span-1 md:col-span-2 space-y-6">
                     <div class="flex items-center gap-2">
                         <div class="p-2 bg-blue-600 rounded-lg text-white">
@@ -408,8 +433,8 @@
                         </div>
                         <span class="text-2xl font-bold tracking-tight">WarungPOS</span>
                     </div>
-                    <p class="text-gray-400 max-w-sm">Mendigitalkan UMKM Indonesia dengan solusi kasir tercanggih, aman,
-                        dan tanpa biaya langganan.</p>
+                    <p class="text-gray-400 max-w-sm">Solusi kasir yang membantu usaha kecil mengelola transaksi,
+                        stok, dan aktivitas penjualan dengan lebih rapi.</p>
                 </div>
                 <div class="space-y-6">
                     <h5 class="text-lg font-bold">Hubungi Kami</h5>
@@ -432,15 +457,15 @@
                     </div>
                 </div>
                 <div class="space-y-6">
-                    <h5 class="text-lg font-bold">Produk Ekosistem</h5>
+                    <h5 class="text-lg font-bold">Navigasi</h5>
                     <ul class="space-y-3 text-gray-400 text-sm">
-                        <li><a href="#" class="hover:text-white transition">SmartBank</a></li>
-                        <li><a href="#" class="hover:text-white transition">API Gateway</a></li>
-                        <li><a href="#" class="hover:text-white transition">Insight Dashboard</a></li>
+                        <li><a href="#fitur" class="hover:text-white transition">Fitur</a></li>
+                        <li><a href="#cara-kerja" class="hover:text-white transition">Cara Kerja</a></li>
+                        <li><a href="#harga" class="hover:text-white transition">Harga</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="pt-8 border-t border-white/10 text-center text-gray-500 text-sm">
+            <div class="section-shell pt-8 border-t border-white/10 text-center text-gray-500 text-sm">
                 <p>© 2026 WarungPOS. Dikembangkan oleh <span class="text-white font-bold"> Revania, Ismi, Rahma</span>.
                 </p>
             </div>

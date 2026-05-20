@@ -1,0 +1,175 @@
+<%- include("../partials/header", { pageTitle, bodyClass: "bg-[#f8fbff] text-slate-900" }) %>
+  <div class="min-h-screen">
+    <header class="sticky top-0 z-30 border-b border-blue-100 bg-white/90 backdrop-blur">
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div>
+          <p class="text-xs uppercase tracking-[0.35em] text-slate-400">WarungPOS</p>
+          <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">Profil Saya</h1>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="/konsumen" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            Kembali
+          </a>
+          <form action="/logout" method="POST">
+            <button type="submit" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <% if (profileError) { %>
+        <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <%= profileError %>
+        </div>
+      <% } %>
+      <% if (passwordError) { %>
+        <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <%= passwordError %>
+        </div>
+      <% } %>
+
+      <section class="overflow-hidden rounded-[32px] bg-white shadow-soft ring-1 ring-slate-200">
+        <div class="bg-gradient-to-r from-blue-700 via-blue-700 to-blue-900 px-6 py-8 text-white sm:px-8">
+          <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <div class="flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white/15 text-3xl font-semibold">
+              <%= (profile?.nama || profile?.email || "K").trim().charAt(0).toUpperCase() %>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-blue-100/80">Akun Konsumen</p>
+              <h2 class="mt-2 truncate text-3xl font-semibold"><%= profile?.nama || "Konsumen" %></h2>
+              <p class="mt-2 truncate text-sm text-blue-100/80"><%= profile?.email || "-" %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-0 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <aside class="border-b border-slate-200 bg-slate-50/80 p-6 lg:border-b-0 lg:border-r lg:p-8">
+            <h3 class="text-lg font-semibold text-slate-950">Informasi Akun</h3>
+            <div class="mt-6 space-y-4">
+              <div class="rounded-3xl bg-white p-4 ring-1 ring-slate-200">
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Nama</p>
+                <p class="mt-2 font-semibold text-slate-950"><%= profile?.nama || "-" %></p>
+              </div>
+              <div class="rounded-3xl bg-white p-4 ring-1 ring-slate-200">
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Email</p>
+                <p class="mt-2 break-all font-semibold text-slate-950"><%= profile?.email || "-" %></p>
+              </div>
+              <div class="rounded-3xl bg-white p-4 ring-1 ring-slate-200">
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Nomor HP</p>
+                <p class="mt-2 font-semibold text-slate-950"><%= profile?.phone || "-" %></p>
+              </div>
+              <div class="rounded-3xl bg-white p-4 ring-1 ring-slate-200">
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Tipe Akun</p>
+                <p class="mt-2 font-semibold capitalize text-slate-950"><%= profile?.role || "konsumen" %></p>
+              </div>
+            </div>
+          </aside>
+
+          <section class="space-y-8 p-6 sm:p-8">
+            <div>
+              <h3 class="text-2xl font-semibold text-slate-950">Informasi Pribadi</h3>
+              <p class="mt-2 text-sm text-slate-500">Perbarui data pribadi Anda agar informasi akun tetap sesuai.</p>
+            </div>
+
+            <form action="/konsumen/profile" method="POST" class="space-y-6">
+              <div class="grid gap-6 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    name="nama"
+                    value="<%= oldInput?.nama || '' %>"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white"
+                    required
+                  >
+                </div>
+
+                <div class="sm:col-span-2">
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Nomor HP</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value="<%= oldInput?.phone || '' %>"
+                    placeholder="08xxxxxxxxxx"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white"
+                  >
+                </div>
+
+                <div class="sm:col-span-2">
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value="<%= oldInput?.email || '' %>"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white"
+                    required
+                  >
+                </div>
+              </div>
+
+              <div class="flex justify-end">
+                <button type="submit" class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+
+            <div class="border-t border-slate-200 pt-8">
+              <div>
+                <h3 class="text-2xl font-semibold text-slate-950">Keamanan Akun</h3>
+                <p class="mt-2 text-sm text-slate-500">Ubah password akun Anda secara berkala untuk menjaga keamanan.</p>
+              </div>
+
+              <form action="/konsumen/profile/password" method="POST" class="mt-8 space-y-6">
+                <div class="grid gap-6 sm:grid-cols-2">
+                  <div class="sm:col-span-2">
+                    <label class="mb-2 block text-sm font-medium text-slate-700">Password Saat Ini</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value="<%= passwordInput?.currentPassword || '' %>"
+                      class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white"
+                      required
+                    >
+                  </div>
+
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-slate-700">Password Baru</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value="<%= passwordInput?.newPassword || '' %>"
+                      class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white"
+                      required
+                    >
+                  </div>
+
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-slate-700">Konfirmasi Password Baru</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value="<%= passwordInput?.confirmPassword || '' %>"
+                      class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white"
+                      required
+                    >
+                  </div>
+                </div>
+
+                <div class="flex justify-end">
+                  <button type="submit" class="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">
+                    Update Password
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+<%- include("../partials/footer", { flash }) %>

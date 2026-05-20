@@ -33,6 +33,23 @@ PREPARE stmt FROM @users_add_nama;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+SET @users_add_phone = (
+  SELECT IF(
+    EXISTS (
+      SELECT 1
+      FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'users'
+        AND COLUMN_NAME = 'phone'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(30) NULL AFTER `email`'
+  )
+);
+PREPARE stmt FROM @users_add_phone;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 UPDATE `users`
 SET `nama` = COALESCE(`nama`, `name`)
 WHERE `nama` IS NULL OR `nama` = '';

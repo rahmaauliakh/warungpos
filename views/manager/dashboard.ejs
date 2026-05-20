@@ -1,4 +1,4 @@
-<%- include("../partials/header", { pageTitle, includeChartJs: true, bodyClass: "bg-slate-100 text-slate-900" }) %>
+<%- include("../partials/header", { pageTitle, includeChartJs: true, bodyClass: "bg-[#f8fbff] text-slate-900" }) %>
   <div class="min-h-screen lg:flex">
     <%- include("../partials/sidebar", {
       sidebarTitle: "Manager Panel",
@@ -11,7 +11,7 @@
     }) %>
 
     <main class="flex-1">
-      <header class="border-b border-slate-200 bg-white/90 px-6 py-5 backdrop-blur">
+      <header class="border-b border-blue-100 bg-white/90 px-6 py-5 backdrop-blur">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p class="text-sm font-medium text-slate-500">Ringkasan operasional</p>
@@ -23,18 +23,18 @@
             <% filters.forEach((item) => { %>
               <a
                 href="/manager?filter=<%= item.key %>"
-                class="rounded-2xl px-4 py-3 text-sm font-semibold transition <%= activeFilter === item.key ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-white' %>"
+                class="rounded-2xl px-4 py-3 text-sm font-semibold transition <%= activeFilter === item.key ? 'bg-blue-600 text-white' : 'border border-blue-100 bg-blue-50/60 text-slate-700 hover:bg-white' %>"
               >
                 <%= item.label %>
               </a>
             <% }) %>
-            <a href="/manager/export/csv?filter=<%= activeFilter %>" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            <a href="/manager/export/csv?filter=<%= activeFilter %>" class="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-blue-50">
               Export CSV
             </a>
-            <a href="/manager/export/pdf?filter=<%= activeFilter %>" class="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+            <a href="/manager/export/pdf?filter=<%= activeFilter %>" class="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
               Export PDF
             </a>
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
+            <div class="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3 shadow-sm">
               <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Status Sistem</p>
               <p class="mt-1 text-sm font-semibold text-emerald-600">POS Online</p>
             </div>
@@ -230,10 +230,10 @@
               <% } %>
             </article>
 
-            <article class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-6 text-white shadow-soft">
-              <p class="text-sm font-medium text-slate-300">Insight Hari Ini</p>
+            <article class="rounded-3xl bg-gradient-to-br from-blue-700 via-blue-700 to-blue-900 p-6 text-white shadow-soft">
+              <p class="text-sm font-medium text-blue-100/80">Insight Hari Ini</p>
               <h3 class="mt-2 text-2xl font-semibold">Pantau penjualan, transaksi, dan performa kasir dari data real-time database.</h3>
-              <p class="mt-3 text-sm leading-6 text-slate-300">
+              <p class="mt-3 text-sm leading-6 text-blue-100/80">
                 Filter periode memudahkan pembacaan performa harian, mingguan, bulanan, atau keseluruhan tanpa meninggalkan dashboard.
               </p>
             </article>
@@ -255,12 +255,12 @@
             datasets: [{
               label: "Total Penjualan",
               data: ${JSON.stringify(chartData.totals)},
-              borderColor: "#0f172a",
-              backgroundColor: "rgba(15, 23, 42, 0.08)",
+              borderColor: "#2563eb",
+              backgroundColor: "rgba(37, 99, 235, 0.12)",
               fill: true,
               tension: 0.35,
               pointRadius: 4,
-              pointBackgroundColor: "#0f172a"
+              pointBackgroundColor: "#2563eb"
             }]
           },
           options: {

@@ -68,25 +68,25 @@ const buildDashboardData = (products) => {
         label: "Total Produk",
         value: `${totalProducts}`,
         description: "Produk aktif dalam katalog",
-        accent: "from-cyan-500 to-blue-500"
+        accent: "from-blue-500 to-blue-600"
       },
       {
         label: "Total Stock",
         value: `${totalStock}`,
         description: "Unit tersedia saat ini",
-        accent: "from-emerald-500 to-teal-500"
+        accent: "from-sky-500 to-blue-500"
       },
       {
         label: "Nilai Inventory",
         value: formatCurrency(inventoryValue),
         description: "Akumulasi harga x stock",
-        accent: "from-amber-500 to-orange-500"
+        accent: "from-indigo-500 to-blue-600"
       },
       {
         label: "Kategori",
         value: `${categories.length}`,
         description: "Kategori produk aktif",
-        accent: "from-fuchsia-500 to-pink-500"
+        accent: "from-blue-700 to-indigo-600"
       }
     ],
     categories
@@ -96,11 +96,12 @@ const buildDashboardData = (products) => {
 exports.index = async (req, res) => {
   try {
     const products = await ProductModel.getAll();
-    const dashboardData = buildDashboardData(products);
+    const orderedProducts = [...products].sort((left, right) => Number(left.id) - Number(right.id));
+    const dashboardData = buildDashboardData(orderedProducts);
 
     return res.render("operator/dashboard", {
       pageTitle: "Operator Product Management",
-      products,
+      products: orderedProducts,
       stats: dashboardData.stats,
       categories: dashboardData.categories,
       formData: req.flashData?.oldInput || {},

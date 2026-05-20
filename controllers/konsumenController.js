@@ -1,6 +1,8 @@
 const ProductModel = require("../models/productModel");
 const TransactionModel = require("../models/transactionModel");
+const UserModel = require("../models/userModel");
 const PDFDocument = require("pdfkit");
+const bcrypt = require("bcrypt");
 
 const setFlash = (req, payload) => {
   req.session.flash = payload;
@@ -151,6 +153,37 @@ const generateInvoice = () => {
   return `INV${timestamp}${randomPart}`;
 };
 
+const getSafeUserSession = (user) => ({
+  id: user.id,
+  nama: user.nama,
+  email: user.email,
+  phone: user.phone || "",
+  role: user.role
+});
+
+const renderProfilePage = (res, {
+  profile,
+  profileError = null,
+  passwordError = null,
+  oldInput = {},
+  passwordInput = {}
+}) => res.render("konsumen/profile", {
+  pageTitle: "Profil Saya",
+  profile,
+  profileError,
+  passwordError,
+  oldInput: {
+    nama: oldInput.nama || profile?.nama || "",
+    email: oldInput.email || profile?.email || "",
+    phone: oldInput.phone || profile?.phone || ""
+  },
+  passwordInput: {
+    currentPassword: passwordInput.currentPassword || "",
+    newPassword: passwordInput.newPassword || "",
+    confirmPassword: passwordInput.confirmPassword || ""
+  }
+});
+
 exports.index = async (req, res) => {
   const search = req.query.search ? req.query.search.trim() : "";
   const kategori = req.query.kategori ? req.query.kategori.trim() : "";
@@ -219,6 +252,187 @@ exports.history = async (req, res) => {
       pageTitle: "Riwayat Transaksi",
       transactions: [],
       historyError: "Gagal memuat riwayat transaksi."
+    });
+  }
+};
+
+exports.profile = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.session.user.id);
+
+    if (!user) {
+      setFlash(req, {
+        type: "error",
+        message: "Profil pengguna tidak ditemukan."
+      });
+      return res.redirect("/login");
+    }
+
+    return renderProfilePage(res, { profile: user });
+  } catch (error) {
+    console.error("Konsumen profile error:", error);
+
+    return res.status(500).render("konsumen/profile", {
+      pageTitle: "Profil Saya",
+      profile: req.session.user,
+      profileError: "Gagal memuat profil pengguna.",
+      passwordError: null,
+      oldInput: {
+        nama: req.session.user?.nama || "",
+        email: req.session.user?.email || "",
+        phone: req.session.user?.phone || ""
+      },
+      passwordInput: {
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      }
+    });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  const nama = req.body.nama ? req.body.nama.trim() : "";
+  const email = req.body.email ? req.body.email.trim().toLowerCase() : "";
+  const phone = req.body.phone ? req.body.phone.trim() : "";
+
+  if (!nama || !email) {
+    return res.status(400).render("konsumen/profile", {
+      pageTitle: "Profil Saya",
+      profile: req.session.user,
+      profileError: "Nama dan email wajib diisi.",
+      passwordError: null,
+      oldInput: { nama, email, phone },
+      passwordInput: {
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      }
+    });
+  }
+
+  try {
+    const currentUser = await UserModel.findById(req.session.user.id);
+    const existingUser = await UserModel.findByEmailExcludingId(email, req.session.user.id);
+
+    if (existingUser) {
+      return renderProfilePage(res, {
+        profile: currentUser || req.session.user,
+        profileError: "Email sudah dipakai akun lain.",
+        oldInput: { nama, email, phone }
+      });
+    }
+
+    const updatedUser = await UserModel.updateProfile({
+      id: req.session.user.id,
+      nama,
+      email,
+      phone
+    });
+
+    req.session.user = getSafeUserSession(updatedUser);
+    setFlash(req, {
+      type: "success",
+      message: "Profil berhasil diperbarui."
+    });
+
+    return req.session.save(() => res.redirect("/konsumen/profile"));
+  } catch (error) {
+    console.error("Update profile error:", error);
+
+    return res.status(500).render("konsumen/profile", {
+      pageTitle: "Profil Saya",
+      profile: req.session.user,
+      profileError: "Gagal memperbarui profil.",
+      passwordError: null,
+      oldInput: { nama, email, phone },
+      passwordInput: {
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      }
+    });
+  }
+};
+
+exports.updatePassword = async (req, res) => {
+  const currentPassword = req.body.currentPassword || "";
+  const newPassword = req.body.newPassword || "";
+  const confirmPassword = req.body.confirmPassword || "";
+
+  try {
+    const user = await UserModel.findById(req.session.user.id);
+
+    if (!user) {
+      setFlash(req, {
+        type: "error",
+        message: "Profil pengguna tidak ditemukan."
+      });
+      return res.redirect("/login");
+    }
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return renderProfilePage(res, {
+        profile: user,
+        passwordError: "Semua field password wajib diisi.",
+        passwordInput: { currentPassword, newPassword, confirmPassword }
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return renderProfilePage(res, {
+        profile: user,
+        passwordError: "Password baru minimal 6 karakter.",
+        passwordInput: { currentPassword, newPassword, confirmPassword }
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return renderProfilePage(res, {
+        profile: user,
+        passwordError: "Konfirmasi password baru tidak sama.",
+        passwordInput: { currentPassword, newPassword, confirmPassword }
+      });
+    }
+
+    const currentUserPassword = await UserModel.findPasswordById(req.session.user.id);
+    const isPasswordValid = await bcrypt.compare(currentPassword, currentUserPassword?.password || "");
+
+    if (!isPasswordValid) {
+      return renderProfilePage(res, {
+        profile: user,
+        passwordError: "Password saat ini tidak sesuai.",
+        passwordInput: { currentPassword: "", newPassword, confirmPassword }
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await UserModel.updatePassword(req.session.user.id, hashedPassword);
+
+    setFlash(req, {
+      type: "success",
+      message: "Password berhasil diperbarui."
+    });
+
+    return res.redirect("/konsumen/profile");
+  } catch (error) {
+    console.error("Update password error:", error);
+
+    return res.status(500).render("konsumen/profile", {
+      pageTitle: "Profil Saya",
+      profile: req.session.user,
+      profileError: null,
+      passwordError: "Gagal memperbarui password.",
+      oldInput: {
+        nama: req.session.user?.nama || "",
+        email: req.session.user?.email || "",
+        phone: req.session.user?.phone || ""
+      },
+      passwordInput: {
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      }
     });
   }
 };
