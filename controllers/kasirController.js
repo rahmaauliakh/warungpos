@@ -101,22 +101,26 @@ const buildDashboardStats = (transactions) => {
     {
       label: "Pending",
       value: transactions.filter((transaction) => transaction.status === "pending").length,
-      description: "Menunggu approve"
+      description: "Menunggu approve",
+      accent: "from-blue-500 to-blue-600"
     },
     {
       label: "Approved",
       value: transactions.filter((transaction) => transaction.status === "approved").length,
-      description: "Siap dibayar"
+      description: "Siap dibayar",
+      accent: "from-sky-500 to-blue-500"
     },
     {
       label: "Paid Hari Ini",
       value: todayPaidTransactions.length,
-      description: "Transaksi selesai"
+      description: "Transaksi selesai",
+      accent: "from-indigo-500 to-blue-600"
     },
     {
       label: "Omzet Hari Ini",
       value: formatCurrency(todayPaidTransactions.reduce((sum, transaction) => sum + Number(transaction.grand_total || 0), 0)),
-      description: "Total paid"
+      description: "Total paid",
+      accent: "from-blue-700 to-indigo-600"
     }
   ];
 };

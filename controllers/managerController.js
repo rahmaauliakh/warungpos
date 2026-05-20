@@ -229,7 +229,7 @@ exports.index = async (req, res) => {
             title: "Total Penjualan",
             value: formatCurrency(normalizedData.kpis.total_sales || 0),
             description: "Akumulasi transaksi paid",
-            accent: "from-emerald-500 to-teal-500"
+            accent: "from-blue-500 to-blue-600"
           },
           {
             title: "Total Transaksi",
@@ -241,13 +241,13 @@ exports.index = async (req, res) => {
             title: "Total Fee POS",
             value: formatCurrency(normalizedData.kpis.total_fee || 0),
             description: "Akumulasi fee layanan",
-            accent: "from-amber-500 to-orange-500"
+            accent: "from-indigo-500 to-blue-600"
           },
           {
             title: "Rata-rata Transaksi",
             value: formatCurrency(normalizedData.kpis.average_transaction || 0),
             description: "Nilai rata-rata per transaksi",
-            accent: "from-fuchsia-500 to-pink-500"
+            accent: "from-blue-700 to-indigo-600"
           }
         ],
         recentTransactions: normalizedData.recentTransactions,
@@ -278,7 +278,7 @@ exports.index = async (req, res) => {
           title: "Total Penjualan",
           value: formatCurrency(dashboardData.kpis.total_sales || 0),
           description: "Akumulasi transaksi paid",
-          accent: "from-emerald-500 to-teal-500"
+          accent: "from-blue-500 to-blue-600"
         },
         {
           title: "Total Transaksi",
@@ -290,13 +290,13 @@ exports.index = async (req, res) => {
           title: "Total Fee POS",
           value: formatCurrency(dashboardData.kpis.total_fee || 0),
           description: "Akumulasi fee layanan",
-          accent: "from-amber-500 to-orange-500"
+          accent: "from-indigo-500 to-blue-600"
         },
         {
           title: "Rata-rata Transaksi",
           value: formatCurrency(dashboardData.kpis.average_transaction || 0),
           description: "Nilai rata-rata per transaksi",
-          accent: "from-fuchsia-500 to-pink-500"
+          accent: "from-blue-700 to-indigo-600"
         }
       ],
       recentTransactions: dashboardData.recentTransactions,
@@ -328,7 +328,7 @@ exports.index = async (req, res) => {
           title: "Total Penjualan",
           value: formatCurrency(0),
           description: "Akumulasi transaksi paid",
-          accent: "from-emerald-500 to-teal-500"
+          accent: "from-blue-500 to-blue-600"
         },
         {
           title: "Total Transaksi",
@@ -340,13 +340,13 @@ exports.index = async (req, res) => {
           title: "Total Fee POS",
           value: formatCurrency(0),
           description: "Akumulasi fee layanan",
-          accent: "from-amber-500 to-orange-500"
+          accent: "from-indigo-500 to-blue-600"
         },
         {
           title: "Rata-rata Transaksi",
           value: formatCurrency(0),
           description: "Nilai rata-rata per transaksi",
-          accent: "from-fuchsia-500 to-pink-500"
+          accent: "from-blue-700 to-indigo-600"
         }
       ],
       recentTransactions: [],

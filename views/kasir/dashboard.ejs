@@ -30,10 +30,14 @@
 
         <section class="grid gap-4 xl:grid-cols-4">
           <% stats.forEach((stat) => { %>
-            <article class="rounded-[24px] bg-white p-5 shadow-[0_20px_45px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
-              <p class="text-sm font-medium text-slate-500"><%= stat.label %></p>
-              <p class="mt-3 text-2xl font-semibold tracking-tight text-slate-950"><%= stat.value %></p>
-              <p class="mt-1 text-sm text-slate-500"><%= stat.description %></p>
+            <article class="overflow-hidden rounded-[24px] bg-white shadow-[0_20px_45px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
+              <div class="bg-gradient-to-r <%= stat.accent %> p-5 text-white">
+                <p class="text-sm font-medium text-white/80"><%= stat.label %></p>
+                <p class="mt-3 text-2xl font-semibold tracking-tight text-white"><%= stat.value %></p>
+              </div>
+              <div class="p-5">
+                <p class="text-sm text-slate-500"><%= stat.description %></p>
+              </div>
             </article>
           <% }) %>
         </section>
