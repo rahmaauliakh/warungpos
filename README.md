@@ -1,3 +1,8 @@
+Anggota kelompok :
+1. Rahma Aulia Khoirunnisa 714240057
+2. Revania Zahrani Ramadeani 714240021
+3. Ismi Nabilah 714240056
+
 # WarungPOS - Sistem Point of Sale Multi-Role
 
 WarungPOS adalah sistem informasi Point of Sale (POS) berbasis web untuk membantu pengelolaan transaksi penjualan, pemesanan mandiri, pembayaran, stok produk, dan laporan keuangan pada unit usaha retail atau warung modern.
