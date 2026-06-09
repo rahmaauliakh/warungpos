@@ -1,0 +1,105 @@
+1.1 Gambaran Umum SistemWarungPOS adalah sebuah sistem informasi Point of Sale (POS) berbasis web yang dirancang khusus untuk mengoptimalkan manajemen transaksi penjualan dan pengelolaan inventaris barang pada unit usaha retail atau warung modern. Aplikasi ini dibangun menggunakan tumpukan teknologi (tech stack) Node.js, Express, MySQL, dan EJS, serta mengadopsi pola arsitektur Model-View-Controller (MVC) untuk memastikan pemisahan logika bisnis, pengelolaan data, dan antarmuka pengguna secara terstruktur dan modular.Sistem ini mendukung fungsionalitas multi-role dengan membagi hak akses operasional ke dalam 4 (empat) aktor utama, yaitu Manager, Operator, Kasir, dan Konsumen. Keunikan dari WarungPOS terletak pada fleksibilitas alur transaksinya, di mana sistem tidak hanya melayani penjualan langsung secara tatap muka oleh kasir (direct sale), melainkan juga mengakomodasi pemesanan mandiri oleh konsumen (self-service ordering) melalui katalog produk digital yang terintegrasi secara real-time.1.2 Peran dalam Ekosistem & StakeholderDalam ekosistem tata kelola bisnis, WarungPOS bertindak sebagai aplikasi retail hilir (front-end POS & ledger) yang bertanggung jawab mencatat arus masuk keuangan dari pelanggan serta mengendalikan laju keluar-masuknya stok barang secara akurat.Berikut adalah matriks peran dan tanggung jawab dari masing-masing pemangku kepentingan (stakeholder) di dalam sistem WarungPOS:Aktor / RolePeran Strategis dalam SistemTanggung Jawab UtamaKonsumenEnd-User / Pembeli MandiriMelakukan registrasi mandiri, menjelajahi katalog, mengelola keranjang belanja (session-based cart), melakukan checkout pemesanan, memantau status pesanan, serta mengunduh bukti transaksi (struk PDF).KasirOperator Transaksi / Verifikator KeuanganMemeriksa dan memberikan persetujuan (approve/reject) atas pesanan mandiri dari konsumen, memproses pembayaran manual maupun simulasi, serta melayani penjualan langsung di tempat (direct sale).OperatorManajer Inventaris / Pengelola ProdukMengelola siklus hidup data produk (CRUD), melakukan pembaruan stok berkala, mengelompokkan kategori barang, serta memantau statistik total nilai aset inventory.ManagerAnalyst / Pengambil KeputusanMemantau Key Performance Indicators (KPI) penjualan, menganalisis grafik performa keuangan, mengawasi produktivitas harian kasir, serta mengekspor laporan formal (CSV/PDF) untuk kebutuhan audit.1.3 Batasan Scope (Sistem Batasan)Untuk menjaga fokus implementasi dan memastikan perangkat lunak bekerja sesuai kontrak spesifikasi teknis, sistem WarungPOS dibatasi oleh ruang lingkup berikut:Pusat Otentikasi & Keamanan: Keamanan sesi pengguna dilindungi menggunakan session management berbasis server dengan kebijakan session timeout otomatis selama 30 menit serta proteksi rute (middleware) ketat berbasis peran (role-based access control). Jika terjadi pelanggaran hak akses, sistem secara otomatis melempar kode error 403.Mekanisme Pengurangan Stok Berbasis Keuangan: Pengurangan stok barang di dalam database bersifat reaktif terhadap penyelesaian transaksi pembayaran (status paid). Status pemesanan awal yang bersifat pending atau approved tidak akan memotong stok gudang untuk menghindari retur fiktif, kecuali pada metode direct sale oleh kasir yang langsung diproses instan ke status paid.Simulasi Sistem Pembayaran Bank: Integrasi transaksi keuangan berbasis non-tunai pada aplikasi ini menggunakan dummy API simulasi eksternal (SmartBank). API ini bertindak sebagai jembatan uji coba yang mengembalikan respons keberhasilan atau kegagalan transaksi secara acak (random success/fail response) untuk memvalidasi ketahanan alur logika program.1.4 Alur Bisnis Utama (Core Flow - Input Proses Output)Sistem WarungPOS mengadopsi prinsip kerja Input-Proses-Output (IPO) yang diimplementasikan ke dalam dua skenario transaksi utama:A. Alur Transaksi Mandiri (Konsumen-to-End)Input: Konsumen masuk ke sistem, memilih produk dari katalog digital, menentukan kuantitas item, memasukkannya ke dalam keranjang belanja (session cart), dan melakukan checkout.Proses: Sistem mendaftarkan data ke tabel transaksi dengan status awal pending. Kasir melakukan peninjauan (review) pada dashboard operasional untuk memberikan keputusan validasi berupa persetujuan (approved) atau penolakan (rejected). Jika disetujui, kasir akan memproses pembayaran.Output: Setelah pembayaran sukses divalidasi, status transaksi berubah menjadi paid, sistem memotong stok produk secara otomatis di database, mencatat nominal pendapatan ke laporan keuangan manager, dan menerbitkan berkas struk digital (PDF receipt) yang dapat diunduh oleh konsumen.B. Alur Transaksi Langsung (Kasir Direct Sale)Input: Kasir memilih item produk dan kuantitas pesanan secara langsung pada antarmuka kasir berdasarkan permintaan pelanggan yang datang ke toko, lalu memilih metode pembayaran.Proses: Sistem melakukan validasi ketersediaan stok seketika (real-time stock validation). Jika stok mencukupi, transaksi langsung diproses melompati tahap peninjauan awal.Output: Transaksi langsung tercatat di database dengan status final paid, stok produk langsung terpotong saat itu juga, biaya layanan (fee) POS dihitung, dan struk belanja diterbitkan secara instan oleh sistem.1.5 Struktur Data Inti (Database Ledger)Untuk mendukung seluruh proses bisnis di atas, persistensi data WarungPOS dikelola oleh basis data relasional MySQL menggunakan 4 tabel inti yang saling berelasi:users: Menyimpan informasi kredensial login (email, password), nomor telepon (phone), serta klasifikasi hak akses (role: manager, operator, kasir, konsumen).products: Menyimpan data master barang dagangan yang meliputi nama produk, kategori, harga jual, sisa stok, dan tautan file gambar.transactions: Tabel header yang merekam data ringkasan transaksi seperti nomor invoice, ID pembeli, total belanja, metode bayar, biaya layanan (fee), status transaksi (pending, approved, paid, rejected), serta penanda pemotongan stok (stock_deducted).transaction_items: Tabel detail (one-to-many dari tabel transaksi) yang menjabarkan daftar produk yang dibeli, harga satuan pada saat transaksi terjadi, dan jumlah kuantitas (quantity) per item.
+BAB II: WORKFLOW (ALUR KERJA) SISTEM
+2.1 Workflow Arsitektur Teknis (Siklus MVC)
+Secara teknis, aplikasi WarungPOS beroperasi menggunakan pola arsitektur Model-View-Controller (MVC). Setiap permintaan (request) dari pengguna diproses melalui alur kerja berikut:
+
+HTTP Request: Pengguna melakukan aksi di peramban (misal: klik tombol Checkout atau Tambah Produk).
+
+Routing (routes/): File route menerima request berdasarkan URL dan metode HTTP (GET/POST), lalu memeriksa hak akses pengguna melalui middleware proteksi role. Jika lolos, request diteruskan ke Controller yang sesuai.
+
+Controller (controllers/): Controller bertindak sebagai otak yang memproses logika bisnis. Jika memerlukan data dari database, Controller akan memanggil fungsi di Model.
+
+Model (models/): Model melakukan kueri ke basis data MySQL (menjalankan perintah SELECT, INSERT, UPDATE, atau DELETE). Setelah mendapatkan data, Model mengembalikannya ke Controller.
+
+View Rendering (views/): Controller menggabungkan data dari Model dengan template EJS (View).
+
+HTTP Response: Server mengirimkan halaman HTML utuh yang sudah dinamis kembali ke browser pengguna.
+
+2.2 Workflow Bisnis & Transaksi Aplikasi
+Berikut adalah rincian alur kerja operasional berdasarkan skenario transaksi yang ada pada aplikasi WarungPOS:
+
+2.2.1 Skenario Alur 1: Pembelian Mandiri oleh Konsumen (Self-Service)
+Alur ini melibatkan interaksi antara Konsumen dan Kasir, mulai dari pemilihan produk hingga penerbitan struk.
+
+[Konsumen: Lihat Katalog] ➔ [Masuk Keranjang (Session)] ➔ [Checkout] 
+                                                               ⬇
+[Stok Dipotong & Struk Terbit] ⬅ [Kasir: Bayar] ⬅ [Kasir: Approve] ⬅ (Status: Pending)
+Tahap 1: Eksplorasi & Pemesanan (Konsumen)
+
+Konsumen melakukan login ke dalam sistem.
+
+Konsumen membuka halaman katalog, mencari produk, atau memfilter berdasarkan kategori.
+
+Konsumen menambahkan produk ke dalam keranjang belanja (Cart). Data keranjang disimpan di dalam session server.
+
+Konsumen masuk ke halaman Cart, menyesuaikan kuantitas (quantity), lalu menekan tombol Checkout.
+
+Sistem membuat data transaksi baru di tabel transactions dengan status pending. Pada tahap ini, stok barang di database belum berkurang.
+
+Tahap 2: Verifikasi & Pembayaran (Kasir)
+6. Kasir masuk ke dashboard transaksi dan melihat daftar pesanan masuk dengan status pending.
+7. Kasir memeriksa detail item. Kasir memiliki hak untuk Approve (menyetujui) atau Reject (menolak) pesanan.
+
+Jika di-reject: Status transaksi berubah menjadi rejected (selesai, alur berhenti).
+
+Jika di-approve: Status transaksi berubah menjadi approved (menunggu pembayaran, stok tetap belum berkurang).
+
+Setelah transaksi berstatus approved, Kasir memproses pembayaran berdasarkan metode yang dipilih (Cash, Transfer, QRIS, atau melalui dummy API SmartBank).
+
+Ketika pembayaran berhasil diselesaikan, Kasir mengubah status transaksi menjadi paid.
+
+Trigger Stok: Sistem secara otomatis mendeteksi perubahan status ke paid, lalu memotong jumlah stok produk di tabel products dan mengubah kolom stock_deducted menjadi true.
+
+Sistem menerbitkan struk PDF belanja. Konsumen kini dapat melihat riwayat transaksi mereka dan mengunduh berkas (receipt) PDF tersebut.
+
+2.2.2 Skenario Alur 2: Penjualan Langsung oleh Kasir (Direct Sale)
+Alur ini berjalan instan ketika ada pelanggan yang membeli langsung di toko tanpa melalui akun konsumen.
+
+[Pelanggan Datang] ➔ [Kasir Pilih Produk & Qty] ➔ [Pilih Metode Bayar]
+                                                           ⬇
+[Struk Instan] ⬅ [Stok Terpotong Otomatis] ⬅ [Transaksi Langsung "Paid"]
+Kasir membuka halaman Point of Sale (POS) / Direct Sale pada dashboard kasir.
+
+Kasir memilih produk dan memasukkan kuantitas secara langsung berdasarkan permintaan pelanggan fisik.
+
+Kasir memilih metode pembayaran yang digunakan oleh pelanggan.
+
+Saat tombol Bayar / Selesai ditekan, sistem langsung melakukan pengecekan stok di database.
+
+Jika stok tersedia, sistem langsung membuat baris transaksi baru di tabel transactions dengan status paid (melewati status pending dan approved).
+
+Potong Stok Instan: Karena status langsung paid, sistem seketika memotong jumlah stok produk pada saat itu juga.
+
+Aplikasi langsung memunculkan opsi cetak struk belanja (receipt) untuk diberikan kepada pelanggan.
+
+2.2.3 Skenario Alur 3: Pengelolaan Inventaris (Operator)
+Alur ini berjalan independen untuk memastikan data barang dagangan selalu siap digunakan oleh Konsumen maupun Kasir.
+
+Operator melakukan login ke dashboard khusus operator.
+
+Operator dapat melihat statistik inventory saat ini (total variasi produk, jumlah keseluruhan stok, dan estimasi total nilai aset rupiah barang).
+
+Proses CRUD Produk:
+
+Tambah: Operator memasukkan nama, harga, stok awal, kategori, dan mengunggah gambar produk baru.
+
+Update/Edit: Operator mengubah data produk atau melakukan restock (menambah stok terpisah jika ada barang masuk dari supplier).
+
+Delete: Operator menghapus produk yang sudah tidak dijual.
+
+Setiap perubahan data yang dilakukan oleh Operator langsung memperbarui tabel products di database MySQL secara real-time.
+
+2.2.4 Skenario Alur 4: Monitoring dan Pelaporan Keuangan (Manager)
+Alur monitoring ini bertindak sebagai hilir akhir yang mengagregasikan seluruh data dari aktivitas Kasir dan Konsumen.
+
+Manager melakukan login ke dashboard utama manager.
+
+Sistem secara otomatis melakukan kueri kalkulasi (perhitungan matematika) ke tabel transactions untuk menampilkan KPI Penjualan (Total Omset, Total Transaksi, Rata-rata Nilai Transaksi, dan Total Pendapatan dari Fee Layanan POS).
+
+Manager menentukan filter periode waktu laporan yang ingin dianalisis (Today, Week, Month, atau All).
+
+Sistem memproses filter tersebut, lalu menyajikan grafik tren penjualan berbasis waktu serta memunculkan performa penjualan masing-masing kasir.
+
+Jika Manager membutuhkan berkas fisik untuk keperluan audit atau rapat, Manager menekan tombol Export CSV atau Export PDF.
+
+Controller menangani kompilasi data transaksi ke dalam format spreadsheet (CSV) atau dokumen cetak (PDF) lalu mengirimkannya sebagai berkas unduhan langsung ke perangkat Manager.

@@ -1,20 +1,340 @@
-# WarungPOS
+# WarungPOS - Sistem Point of Sale Multi-Role
 
-WarungPOS adalah aplikasi POS multi-role berbasis Node.js, Express, MySQL, EJS, dan Tailwind CSS. Project ini memakai pola MVC dan mencakup alur operasional utama dari login role, katalog produk, checkout konsumen, approval kasir, pembayaran, sampai dashboard manager dan export laporan.
+WarungPOS adalah sistem informasi Point of Sale (POS) berbasis web untuk membantu pengelolaan transaksi penjualan, pemesanan mandiri, pembayaran, stok produk, dan laporan keuangan pada unit usaha retail atau warung modern.
 
-## Fitur
+Aplikasi ini dibangun menggunakan Node.js, Express, MySQL, EJS, dan Tailwind CSS. Struktur aplikasinya mengikuti pola Model-View-Controller (MVC), sehingga pemrosesan route, logika bisnis, akses database, dan tampilan pengguna dipisahkan ke dalam folder yang jelas.
 
-- Login multi-role: `manager`, `operator`, `kasir`, `konsumen`
-- Dashboard manager dengan KPI real-time, chart penjualan, monitor kasir, filter periode, export CSV, dan export PDF
-- Dashboard operator untuk CRUD produk, update stock, kategori, dan gambar produk
-- Katalog konsumen dengan search, filter kategori, session cart, checkout, waiting approval, dan receipt
-- Dashboard kasir untuk approve, reject, detail transaksi, pembayaran manual, dan SmartBank dummy API
-- Security middleware: `helmet`, `express-rate-limit`, sanitasi input, session timeout
-- Error pages modern: `403`, `404`, `500`
-- Partial layout reusable: `header`, `sidebar`, `footer`
-- Toast notification, loading button, confirm delete, dan responsive dashboard layout
+---
 
-## Teknologi
+## 1. Panduan Gambar Workflow
+
+> [!IMPORTANT]
+> Gambar workflow belum disertakan di repository ini. Setelah diagram dibuat, simpan gambar di root project atau folder `public/` lalu sesuaikan path gambar di bagian ini. Jika mengikuti nama yang direncanakan, gunakan nama file seperti `worflowpos.png`.
+
+Contoh jika gambar disimpan di root project dengan nama `worflowpos.png`:
+
+```md
+![Workflow WarungPOS](worflowpos.png)
+```
+
+Contoh jika gambar disimpan di folder `public/images/`:
+
+```md
+![Workflow WarungPOS](public/images/worflowpos.png)
+```
+
+---
+
+## 2. Deskripsi & Konteks Sistem
+
+### 2.1 Deskripsi Aplikasi
+
+WarungPOS dirancang untuk mendukung dua pola transaksi utama:
+
+1. Pembelian mandiri oleh konsumen melalui katalog digital.
+2. Penjualan langsung oleh kasir untuk pelanggan yang datang ke toko.
+
+Pada alur pembelian mandiri, konsumen dapat memilih produk, memasukkan barang ke keranjang, checkout, lalu menunggu validasi kasir. Stok produk baru dipotong setelah transaksi benar-benar dibayar dan berstatus `paid`.
+
+Pada alur penjualan langsung, kasir memilih produk dan metode pembayaran secara langsung. Jika stok mencukupi, transaksi langsung dibuat dengan status `paid` dan stok produk otomatis berkurang.
+
+### 2.2 Stakeholder & Hak Akses
+
+| Role | Peran dalam Sistem | Tanggung Jawab Utama |
+| --- | --- | --- |
+| Manager | Pengambil keputusan dan pemantau bisnis | Melihat KPI penjualan, grafik performa, transaksi terbaru, performa kasir, serta export laporan CSV/PDF. |
+| Operator | Pengelola inventaris | Mengelola data produk, kategori, harga, stok, dan gambar produk. |
+| Kasir | Verifikator transaksi dan pembayaran | Approve/reject pesanan konsumen, memproses pembayaran, membuat direct sale, dan melihat struk transaksi. |
+| Konsumen | Pembeli mandiri | Melihat katalog, mengelola cart, checkout, memantau status pesanan, melihat riwayat, dan mengunduh receipt PDF. |
+
+### 2.3 Batasan Sistem
+
+1. **Otentikasi berbasis session**
+   Aplikasi menggunakan `express-session`. User yang belum login akan diarahkan ke halaman `/login`.
+
+2. **Role-Based Access Control**
+   Setiap dashboard hanya dapat diakses oleh role yang sesuai. Jika user mencoba mengakses halaman role lain, sistem menampilkan halaman error `403`.
+
+3. **Session timeout**
+   Session pengguna otomatis kedaluwarsa setelah 30 menit tidak aktif.
+
+4. **Pengurangan stok berbasis status pembayaran**
+   Stok produk tidak dikurangi saat transaksi masih `pending` atau `approved`. Stok baru dikurangi ketika transaksi menjadi `paid`.
+
+5. **SmartBank dummy API**
+   Pembayaran SmartBank pada aplikasi ini adalah simulasi. Sistem membuat `payment_request_id` dummy dan mengembalikan status `success` atau `failed` secara acak.
+
+---
+
+## 3. Fitur Utama & Alur Input-Proses-Output
+
+### 3.1 Autentikasi Multi-Role
+
+- **Input:** email dan password user.
+- **Proses:** sistem memvalidasi input, mencari user berdasarkan email, membandingkan password menggunakan `bcrypt`, lalu menyimpan data user ke session.
+- **Output:** user diarahkan ke dashboard sesuai role: `/manager`, `/operator`, `/kasir`, atau `/konsumen`.
+
+### 3.2 Katalog & Checkout Konsumen
+
+- **Input:** pencarian produk, filter kategori, item cart, quantity, dan aksi checkout.
+- **Proses:** sistem menyimpan cart di session, memvalidasi stok, menghitung subtotal, fee layanan, grand total, lalu membuat transaksi dengan status awal `pending`.
+- **Output:** konsumen diarahkan ke halaman waiting approval dan dapat memantau status transaksi.
+
+### 3.3 Approval Pesanan oleh Kasir
+
+- **Input:** ID transaksi dengan status `pending`.
+- **Proses:** kasir memeriksa detail transaksi, lalu memilih `approve` atau `reject`.
+- **Output:** status transaksi berubah menjadi `approved` atau `rejected`.
+
+### 3.4 Pembayaran Transaksi
+
+- **Input:** ID transaksi approved dan metode pembayaran.
+- **Proses:** sistem memvalidasi status transaksi, mengecek ulang stok, memproses pembayaran manual atau SmartBank dummy, lalu mengubah status menjadi `paid` jika berhasil.
+- **Output:** stok produk berkurang, transaksi tercatat sebagai penjualan selesai, dan struk dapat ditampilkan.
+
+### 3.5 Direct Sale oleh Kasir
+
+- **Input:** produk, quantity, dan metode pembayaran.
+- **Proses:** sistem mengecek stok real-time, menghitung subtotal, fee, grand total, membuat transaksi langsung berstatus `paid`, dan memotong stok produk.
+- **Output:** kasir diarahkan ke halaman receipt transaksi.
+
+### 3.6 Manajemen Produk oleh Operator
+
+- **Input:** nama produk, harga, stok, kategori, dan gambar.
+- **Proses:** operator dapat menambah, mengubah, memperbarui stok, atau menghapus data produk.
+- **Output:** data produk pada tabel `products` diperbarui dan langsung tampil di katalog konsumen serta dashboard kasir.
+
+### 3.7 Monitoring dan Laporan Manager
+
+- **Input:** filter periode laporan seperti `today`, `week`, `month`, atau `all`.
+- **Proses:** sistem mengambil data transaksi `paid`, menghitung KPI, membuat grafik penjualan, menampilkan performa kasir, dan menyiapkan data export.
+- **Output:** dashboard manager menampilkan ringkasan penjualan dan dapat mengunduh laporan dalam format CSV/PDF.
+
+---
+
+## 4. Workflow Sistem
+
+### 4.1 Workflow Arsitektur MVC
+
+```mermaid
+flowchart TD
+    A[User melakukan aksi di browser] --> B[Routes menerima HTTP request]
+    B --> C{Middleware auth dan role}
+    C -->|valid| D[Controller memproses logika bisnis]
+    C -->|tidak valid| E[Redirect login atau halaman 403]
+    D --> F[Model menjalankan query MySQL]
+    F --> G[(Database MySQL)]
+    G --> F
+    F --> D
+    D --> H[Render EJS view atau kirim JSON]
+    H --> I[Browser menampilkan response]
+```
+
+### 4.2 Workflow Pembelian Mandiri Konsumen
+
+```mermaid
+flowchart LR
+    A[Konsumen login] --> B[Lihat katalog produk]
+    B --> C[Tambah produk ke cart]
+    C --> D[Checkout]
+    D --> E[Transaksi status pending]
+    E --> F{Kasir validasi}
+    F -->|Reject| G[Status rejected]
+    F -->|Approve| H[Status approved]
+    H --> I[Kasir proses pembayaran]
+    I --> J{Pembayaran berhasil?}
+    J -->|Tidak| H
+    J -->|Ya| K[Status paid]
+    K --> L[Stok produk dipotong]
+    L --> M[Receipt tersedia untuk konsumen]
+```
+
+### 4.3 Workflow Direct Sale Kasir
+
+```mermaid
+flowchart LR
+    A[Pelanggan datang ke toko] --> B[Kasir memilih produk dan quantity]
+    B --> C[Kasir memilih metode bayar]
+    C --> D{Stok mencukupi?}
+    D -->|Tidak| E[Transaksi ditolak oleh sistem]
+    D -->|Ya| F[Transaksi dibuat status paid]
+    F --> G[Stok langsung dipotong]
+    G --> H[Receipt ditampilkan]
+```
+
+---
+
+## 5. Skema Database
+
+WarungPOS menggunakan database MySQL dengan 4 tabel inti.
+
+### 5.1 Tabel `users`
+
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | INT, PK | ID user. |
+| `name` | VARCHAR(100) | Nama user versi lama/kompatibilitas. |
+| `nama` | VARCHAR(100) | Nama user yang digunakan aplikasi. |
+| `email` | VARCHAR(100), UNIQUE | Email login. |
+| `phone` | VARCHAR(30) | Nomor telepon user. |
+| `password` | VARCHAR(255) | Password hash `bcrypt`. |
+| `role` | ENUM | `manager`, `operator`, `kasir`, `konsumen`. |
+| `created_at` | TIMESTAMP | Waktu user dibuat. |
+
+### 5.2 Tabel `products`
+
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | INT, PK | ID produk. |
+| `nama_produk` | VARCHAR(150) | Nama produk. |
+| `harga` | DECIMAL(12,2) | Harga jual produk. |
+| `stock` | INT | Jumlah stok tersedia. |
+| `kategori` | VARCHAR(100) | Kategori produk. |
+| `gambar` | TEXT | Path atau URL gambar produk. |
+| `created_at` | TIMESTAMP | Waktu produk dibuat. |
+
+### 5.3 Tabel `transactions`
+
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | INT, PK | ID transaksi. |
+| `invoice` | VARCHAR(50), UNIQUE | Nomor invoice transaksi. |
+| `user_id` | INT, FK | ID konsumen, dapat kosong untuk direct sale. |
+| `cashier_id` | INT, FK | ID kasir yang memproses transaksi. |
+| `subtotal` | DECIMAL(12,2) | Total harga item sebelum fee. |
+| `fee` | DECIMAL(12,2) | Fee layanan POS. |
+| `grand_total` | DECIMAL(12,2) | Total akhir pembayaran. |
+| `status` | ENUM | `pending`, `approved`, `paid`, `rejected`. |
+| `payment_method` | VARCHAR(50) | Metode pembayaran. |
+| `stock_deducted` | TINYINT(1) | Penanda apakah stok sudah dikurangi. |
+| `created_at` | TIMESTAMP | Waktu transaksi dibuat. |
+
+### 5.4 Tabel `transaction_items`
+
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | INT, PK | ID detail transaksi. |
+| `transaction_id` | INT, FK | Relasi ke tabel `transactions`. |
+| `product_id` | INT, FK | Relasi ke tabel `products`. |
+| `qty` | INT | Jumlah produk dibeli. |
+| `price` | DECIMAL(12,2) | Harga satuan saat transaksi dibuat. |
+| `subtotal` | DECIMAL(12,2) | Total harga item. |
+
+### 5.5 ERD Sederhana
+
+```mermaid
+erDiagram
+    USERS ||--o{ TRANSACTIONS : "membuat"
+    USERS ||--o{ TRANSACTIONS : "memproses"
+    TRANSACTIONS ||--o{ TRANSACTION_ITEMS : "memiliki"
+    PRODUCTS ||--o{ TRANSACTION_ITEMS : "dibeli"
+
+    USERS {
+        int id PK
+        string nama
+        string email
+        string phone
+        string password
+        enum role
+    }
+
+    PRODUCTS {
+        int id PK
+        string nama_produk
+        decimal harga
+        int stock
+        string kategori
+        text gambar
+    }
+
+    TRANSACTIONS {
+        int id PK
+        string invoice
+        int user_id FK
+        int cashier_id FK
+        decimal subtotal
+        decimal fee
+        decimal grand_total
+        enum status
+        string payment_method
+        boolean stock_deducted
+    }
+
+    TRANSACTION_ITEMS {
+        int id PK
+        int transaction_id FK
+        int product_id FK
+        int qty
+        decimal price
+        decimal subtotal
+    }
+```
+
+---
+
+## 6. Route Utama
+
+### 6.1 Auth
+
+| Method | Route | Keterangan |
+| --- | --- | --- |
+| GET | `/` | Redirect berdasarkan status login. |
+| GET | `/login` | Halaman login. |
+| POST | `/login` | Proses login. |
+| GET | `/register` | Halaman register konsumen. |
+| POST | `/register` | Proses register user. |
+| POST | `/logout` | Logout user. |
+
+### 6.2 Konsumen
+
+| Method | Route | Keterangan |
+| --- | --- | --- |
+| GET | `/konsumen` | Katalog produk dan cart. |
+| GET | `/konsumen/profile` | Profil konsumen. |
+| POST | `/konsumen/profile` | Update profil. |
+| POST | `/konsumen/profile/password` | Update password. |
+| GET | `/konsumen/history` | Riwayat transaksi. |
+| POST | `/konsumen/cart/:id/add` | Tambah produk ke cart. |
+| POST | `/konsumen/cart/:id/qty` | Update quantity cart. |
+| POST | `/konsumen/cart/:id/remove` | Hapus item dari cart. |
+| POST | `/konsumen/checkout` | Checkout cart menjadi transaksi pending. |
+| GET | `/konsumen/waiting/:invoice` | Status approval transaksi. |
+| GET | `/konsumen/receipt/:invoice` | Halaman receipt. |
+| GET | `/konsumen/receipt/:invoice/download` | Download receipt PDF. |
+
+### 6.3 Kasir
+
+| Method | Route | Keterangan |
+| --- | --- | --- |
+| GET | `/kasir` | Dashboard kasir. |
+| POST | `/kasir/direct-sale` | Membuat transaksi langsung. |
+| POST | `/kasir/approve/:id` | Approve transaksi pending. |
+| POST | `/kasir/reject/:id` | Reject transaksi pending. |
+| POST | `/kasir/pay/:id` | Memproses pembayaran transaksi approved. |
+| POST | `/pos/pembayaran` | Simulasi pembayaran SmartBank. |
+| GET | `/kasir/receipt/:id` | Receipt transaksi kasir. |
+
+### 6.4 Operator
+
+| Method | Route | Keterangan |
+| --- | --- | --- |
+| GET | `/operator` | Dashboard operator. |
+| POST | `/operator/products` | Tambah produk. |
+| POST | `/operator/products/:id/update` | Update produk. |
+| POST | `/operator/products/:id/stock` | Update stok produk. |
+| POST | `/operator/products/:id/delete` | Hapus produk. |
+
+### 6.5 Manager
+
+| Method | Route | Keterangan |
+| --- | --- | --- |
+| GET | `/manager` | Dashboard KPI dan laporan. |
+| GET | `/manager/export/csv` | Export laporan CSV. |
+| GET | `/manager/export/pdf` | Export laporan PDF. |
+
+---
+
+## 7. Teknologi
 
 - Node.js
 - Express
@@ -22,22 +342,38 @@ WarungPOS adalah aplikasi POS multi-role berbasis Node.js, Express, MySQL, EJS, 
 - EJS
 - Tailwind CSS via CDN
 - `bcrypt`
-- `helmet`
+- `dotenv`
+- `express-session`
 - `express-rate-limit`
 - `express-validator`
+- `helmet`
+- `mysql2`
 - `csv-writer`
 - `pdfkit`
+- `nodemon`
 
-## Instalasi
+---
 
-1. Clone atau buka project ini di mesin lokal.
-2. Install dependency:
+## 8. Instalasi dan Menjalankan Project
+
+### 8.1 Prasyarat
+
+Pastikan sudah tersedia:
+
+- Node.js
+- NPM
+- MySQL atau MariaDB
+- Laragon/XAMPP/phpMyAdmin atau database client lain
+
+### 8.2 Install Dependency
 
 ```bash
 npm install
 ```
 
-3. Siapkan file `.env`:
+### 8.3 Konfigurasi Environment
+
+Buat file `.env` di root project:
 
 ```env
 DB_HOST=localhost
@@ -47,14 +383,19 @@ DB_NAME=warungpos
 PORT=3000
 ```
 
-4. Pastikan database MySQL aktif dan tabel utama tersedia:
+Sesuaikan `DB_USER` dan `DB_PASS` dengan konfigurasi MySQL lokal.
 
-- `users`
-- `products`
-- `transactions`
-- `transaction_items`
+### 8.4 Import Database
 
-## Menjalankan Project
+Jalankan file SQL berikut pada MySQL:
+
+```txt
+database/migrate_to_current_schema.sql
+```
+
+File tersebut akan membuat database `warungpos` dan tabel inti yang dibutuhkan aplikasi.
+
+### 8.5 Jalankan Aplikasi
 
 Mode development:
 
@@ -62,108 +403,70 @@ Mode development:
 npm run dev
 ```
 
-Mode production/local run:
+Mode biasa:
 
 ```bash
 npm start
 ```
 
-Default app akan berjalan di:
+Aplikasi berjalan pada:
 
 ```txt
 http://localhost:3000
 ```
 
-## Akun Role Demo
+---
 
-Project ini mengasumsikan data user demo sudah ada di tabel `users` dan password disimpan dalam hash `bcrypt`.
-
-Contoh role:
-
-- Manager: akses `/manager`
-- Operator: akses `/operator`
-- Kasir: akses `/kasir`
-- Konsumen: akses `/konsumen`
-
-Contoh struktur data `users`:
-
-```txt
-id | nama        | email              | password_hash | role
-1  | Manager     | manager@test.com   | bcrypt hash   | manager
-2  | Operator    | operator@test.com  | bcrypt hash   | operator
-3  | Kasir       | kasir@test.com     | bcrypt hash   | kasir
-4  | Konsumen    | konsumen@test.com  | bcrypt hash   | konsumen
-```
-
-## Struktur Folder
+## 9. Struktur Folder
 
 ```txt
 warungpos/
-├── app.js
-├── config/
-│   └── db.js
-├── controllers/
-│   ├── authController.js
-│   ├── errorController.js
-│   ├── kasirController.js
-│   ├── konsumenController.js
-│   ├── managerController.js
-│   └── operatorController.js
-├── middleware/
-│   ├── auth.js
-│   └── sanitize.js
-├── models/
-│   ├── productModel.js
-│   ├── transactionModel.js
-│   └── userModel.js
-├── routes/
-│   ├── authRoutes.js
-│   ├── kasirRoutes.js
-│   ├── konsumenRoutes.js
-│   ├── managerRoutes.js
-│   └── operatorRoutes.js
-├── views/
-│   ├── auth/
-│   ├── errors/
-│   ├── kasir/
-│   ├── konsumen/
-│   ├── manager/
-│   ├── operator/
-│   └── partials/
-└── public/
+|-- app.js
+|-- package.json
+|-- README.md
+|-- catatan.txt
+|-- config/
+|   `-- db.js
+|-- controllers/
+|   |-- authController.js
+|   |-- errorController.js
+|   |-- kasirController.js
+|   |-- konsumenController.js
+|   |-- managerController.js
+|   `-- operatorController.js
+|-- database/
+|   `-- migrate_to_current_schema.sql
+|-- middleware/
+|   |-- auth.js
+|   `-- sanitize.js
+|-- models/
+|   |-- productModel.js
+|   |-- transactionModel.js
+|   `-- userModel.js
+|-- public/
+|   |-- css/
+|   `-- js/
+|-- routes/
+|   |-- authRoutes.js
+|   |-- kasirRoutes.js
+|   |-- konsumenRoutes.js
+|   |-- managerRoutes.js
+|   `-- operatorRoutes.js
+`-- views/
+    |-- auth/
+    |-- errors/
+    |-- kasir/
+    |-- konsumen/
+    |-- manager/
+    |-- operator/
+    `-- partials/
 ```
 
-## Route Utama
+---
 
-- `GET /login`
-- `GET /manager`
-- `GET /manager/export/csv`
-- `GET /manager/export/pdf`
-- `GET /operator`
-- `GET /konsumen`
-- `GET /konsumen/waiting/:invoice`
-- `GET /kasir`
-- `POST /pos/pembayaran`
+## 10. SmartBank Dummy API
 
-## Catatan Schema
-
-Project ini mengasumsikan tabel `transactions` memiliki kolom tambahan berikut:
-
-- `cashier_id`
-- `payment_method`
-- `created_at`
-
-Project ini juga mengasumsikan tabel `products` memiliki kolom:
-
-- `nama_produk`
-- `harga`
-- `stock`
-- `kategori`
-- `gambar`
-
-## SmartBank Dummy API
-
-Route:
+Route simulasi:
 
 ```txt
 POST /pos/pembayaran
@@ -177,4 +480,53 @@ Payload minimal:
 }
 ```
 
-Response akan mengembalikan `payment_request_id` dan status dummy `success` atau `failed`. Jika sukses, transaksi diubah menjadi `paid` dan stock produk akan dikurangi.
+Contoh response sukses:
+
+```json
+{
+  "success": true,
+  "payment_request_id": "SB-1710000000000-1234",
+  "status": "success",
+  "transaction_id": 12,
+  "message": "Pembayaran SmartBank berhasil."
+}
+```
+
+Contoh response gagal:
+
+```json
+{
+  "success": false,
+  "payment_request_id": "SB-1710000000000-5678",
+  "status": "failed",
+  "message": "Pembayaran SmartBank gagal diproses."
+}
+```
+
+Jika pembayaran sukses, transaksi berubah menjadi `paid`, `payment_method` menjadi `smartbank`, dan stok produk dikurangi.
+
+---
+
+## 11. Status Penyelesaian Fitur
+
+- [x] Autentikasi login dan register.
+- [x] Role access untuk Manager, Operator, Kasir, dan Konsumen.
+- [x] Dashboard Manager dengan KPI, grafik, performa kasir, dan export laporan.
+- [x] Dashboard Operator untuk CRUD produk dan update stok.
+- [x] Katalog Konsumen dengan search, filter kategori, cart, checkout, waiting approval, history, dan receipt.
+- [x] Dashboard Kasir untuk approval transaksi, pembayaran, direct sale, dan receipt.
+- [x] Pengurangan stok otomatis saat transaksi `paid`.
+- [x] Simulasi pembayaran SmartBank dummy.
+- [x] Middleware keamanan: Helmet, rate limit, sanitasi input, session timeout, dan error pages.
+- [x] Dokumentasi workflow, database, route, instalasi, dan struktur folder.
+
+---
+
+## 12. Catatan Pengembangan
+
+- Password user disimpan dalam bentuk hash `bcrypt`.
+- Register pada aplikasi digunakan untuk membuat akun konsumen.
+- Data demo user role lain dapat ditambahkan langsung ke tabel `users`.
+- Nilai `SESSION_MAX_AGE` pada `app.js` adalah 30 menit.
+- Untuk kebutuhan laporan, Manager hanya menghitung transaksi dengan status `paid`.
+- File `catatan.txt` berisi bahan dokumentasi awal dan sudah dirapikan ke dalam README ini.
