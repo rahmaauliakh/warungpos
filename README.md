@@ -270,6 +270,76 @@ erDiagram
     }
 ```
 
+### 5.6 Sintaks SQL Database
+
+Jalankan sintaks SQL berikut di MySQL atau MariaDB untuk membuat database dan tabel yang dibutuhkan aplikasi:
+
+```sql
+CREATE DATABASE IF NOT EXISTS `warungpos`
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE `warungpos`;
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) DEFAULT NULL,
+  `nama` VARCHAR(100) DEFAULT NULL,
+  `email` VARCHAR(100) DEFAULT NULL,
+  `phone` VARCHAR(30) DEFAULT NULL,
+  `password` VARCHAR(255) DEFAULT NULL,
+  `role` ENUM('manager', 'operator', 'kasir', 'konsumen') NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `nama_produk` VARCHAR(150) NOT NULL,
+  `harga` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `stock` INT NOT NULL DEFAULT 0,
+  `kategori` VARCHAR(100) NOT NULL,
+  `gambar` TEXT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `transactions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `invoice` VARCHAR(50) NOT NULL,
+  `user_id` INT NULL,
+  `cashier_id` INT NULL,
+  `subtotal` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `fee` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `grand_total` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `status` ENUM('pending', 'approved', 'paid', 'rejected') NOT NULL DEFAULT 'pending',
+  `payment_method` VARCHAR(50) DEFAULT NULL,
+  `stock_deducted` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `invoice` (`invoice`),
+  KEY `fk_transactions_user` (`user_id`),
+  KEY `fk_transactions_cashier` (`cashier_id`),
+  CONSTRAINT `fk_transactions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `fk_transactions_cashier` FOREIGN KEY (`cashier_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `transaction_items` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `transaction_id` INT NOT NULL,
+  `product_id` INT NOT NULL,
+  `qty` INT NOT NULL DEFAULT 1,
+  `price` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `subtotal` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  PRIMARY KEY (`id`),
+  KEY `fk_transaction_items_transaction` (`transaction_id`),
+  KEY `fk_transaction_items_product` (`product_id`),
+  CONSTRAINT `fk_transaction_items_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_transaction_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
 ---
 
 ## 6. Route Utama
